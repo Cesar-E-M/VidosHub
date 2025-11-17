@@ -1,4 +1,3 @@
-import React from "react";
 export const HeroSection = () => {
   return (
     <section className="mb-12 text-center py-8 px-8">

@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import "./../globals.css";
-import { Header } from "@/src/components/Heder";
-import { HeroSection } from "@/src/components/HeroSection";
+import { Header } from "@/components/Heder";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -23,7 +22,6 @@ export default function RootLayout({
   return (
     <div className={`${lato.className} flex min-h-screen flex-col antialiased`}>
       <Header />
-      <HeroSection />
       {children}
     </div>
   );

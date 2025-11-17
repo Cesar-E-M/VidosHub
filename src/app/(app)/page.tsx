@@ -1,5 +1,10 @@
-import React from "react";
-
+import { HeroSection } from "@/components/HeroSection";
+import { MasPopulares } from "@/components/MasPopulares";
 export default function Home() {
-  return <></>;
+  return (
+    <>
+      <HeroSection />
+      <MasPopulares />
+    </>
+  );
 }
