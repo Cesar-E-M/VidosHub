@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import { Play, Clock, Eye, Heart, MessageCircle, Trash2 } from "lucide-react";
-import { Card } from "@radix-ui/themes";
+import { Box, Card, Inset } from "@radix-ui/themes";
 import { Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -131,73 +131,77 @@ export const VideoCard = ({
   };
 
   return (
-    <Card className="rounded-lg text-card-foreground group overflow-hidden border-0 shadow-card transition-all hover:shadow-card-hover cursor-pointer">
-      <div
-        className="relative aspect-video overflow-hidden bg-muted rounded-t-lg"
-        onClick={onVideoClick}
-      >
-        {/*<Image
+    <Box>
+      <Card className="rounded-lg text-card-foreground group overflow-hidden border-0 shadow-card transition-all hover:shadow-card-hover cursor-pointer">
+        <Inset clip="padding-box" side="top" pb="current">
+          <div
+            className="relative aspect-video overflow-hidden bg-muted rounded-t-lg"
+            onClick={onVideoClick}
+          >
+            {/*<Image
           src={thumbnail}
           alt={title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />*/}
-        <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm">
-            <Play className="h-6 w-6 text-primary fill-primary ml-1" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm">
+                <Play className="h-6 w-6 text-primary fill-primary ml-1" />
+              </div>
+            </div>
+            <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              <Clock className="inline h-3 w-3 mr-1" />
+              {duration}
+            </div>
+            <div className="absolute top-2 left-2 rounded-full bg-black/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+              {category}
+            </div>
           </div>
-        </div>
-        <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-          <Clock className="inline h-3 w-3 mr-1" />
-          {duration}
-        </div>
-        <div className="absolute top-2 left-2 rounded-full bg-black/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-          {category}
-        </div>
-      </div>
 
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors flex-1">
-            {title}
-          </h3>
-          {currentUserId === userId && (
-            <Button
-              variant="ghost"
-              size="1"
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={handleDelete}
-              disabled={isLoading}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
+          <div className="p-4">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h3 className="text-gray-400 font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors flex-1">
+                {title}
+              </h3>
+              {currentUserId === userId && (
+                <Button
+                  variant="ghost"
+                  size="1"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  onClick={handleDelete}
+                  disabled={isLoading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
 
-        <p className="text-sm text-muted-foreground mb-2">@{username}</p>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {description}
-        </p>
+            <p className="text-sm text-muted-foreground mb-2">@{username}</p>
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+              {description}
+            </p>
 
-        <div className="flex items-center gap-4 text-sm">
-          <Button
-            variant="ghost"
-            size="1"
-            className={`gap-1 h-8 ${
-              isLiked ? "text-primary" : "text-muted-foreground"
-            }`}
-            onClick={handleLike}
-            disabled={isLoading}
-          >
-            <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
-            <span>{likes}</span>
-          </Button>
+            <div className="flex items-center gap-4 text-sm">
+              <Button
+                variant="ghost"
+                size="1"
+                className={`gap-1 h-8 ${
+                  isLiked ? "text-primary" : "text-muted-foreground"
+                }`}
+                onClick={handleLike}
+                disabled={isLoading}
+              >
+                <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+                <span>{likes}</span>
+              </Button>
 
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <MessageCircle className="h-4 w-4" />
-            <span>{commentsCount}</span>
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <MessageCircle className="h-4 w-4" />
+                <span>{commentsCount}</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </Card>
+        </Inset>
+      </Card>
+    </Box>
   );
 };

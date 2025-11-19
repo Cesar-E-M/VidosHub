@@ -1,10 +1,8 @@
-import { HeroSection } from "@/components/HeroSection";
-import { MasPopulares } from "@/components/MasPopulares";
+import { VideoView } from "@/components/VideoView";
 export default function Home() {
   return (
     <>
-      <HeroSection />
-      <MasPopulares />
+      <VideoView />
     </>
   );
 }

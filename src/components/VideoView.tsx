@@ -1,9 +1,8 @@
 import { VideoCard } from "@/components/VideoCard";
 
-export const MasPopulares = () => {
+export const VideoView = () => {
   return (
-    <div className="px-8 pb-5">
-      <h2 className="text-2xl font-bold mb-4">Videos Más Populares</h2>
+    <div className="px-8 pb-5 pt-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  items-center gap-6">
         <VideoCard
           id="1"
@@ -11,7 +10,7 @@ export const MasPopulares = () => {
           description="Este es un video de ejemplo para mostrar cómo se ve el VideoCard."
           thumbnail="https://via.placeholder.com/300x200.png?text=Thumbnail"
           duration="5:30"
-          category="Entretenimiento"
+          category="Deportes"
           likesCount={120}
           commentsCount={45}
           userHasLiked={false}
@@ -31,7 +30,7 @@ export const MasPopulares = () => {
           userHasLiked={true}
           username="OtroUsuario"
           userId="456"
-          currentUserId="123"
+          currentUserId="456"
         />
         <VideoCard
           id="3"
@@ -45,7 +44,7 @@ export const MasPopulares = () => {
           userHasLiked={false}
           username="TercerUsuario"
           userId="789"
-          currentUserId="123"
+          currentUserId="789"
         />
         <VideoCard
           id="4"
@@ -59,7 +58,7 @@ export const MasPopulares = () => {
           userHasLiked={true}
           username="CuartoUsuario"
           userId="101"
-          currentUserId="123"
+          currentUserId="101"
         />
         <VideoCard
           id="5"
@@ -73,7 +72,7 @@ export const MasPopulares = () => {
           userHasLiked={false}
           username="QuintoUsuario"
           userId="102"
-          currentUserId="123"
+          currentUserId="102"
         />
         <VideoCard
           id="6"
@@ -87,7 +86,7 @@ export const MasPopulares = () => {
           userHasLiked={true}
           username="SextoUsuario"
           userId="103"
-          currentUserId="123"
+          currentUserId="103"
         />
       </div>
     </div>

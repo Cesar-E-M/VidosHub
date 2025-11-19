@@ -2,6 +2,8 @@ import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
+import { UploadModal } from "@/components/UploadModal";
+import { AuthProvider } from "@/hooks/context/useAuth";
 
 export default function RootLayout({
   children,
@@ -16,8 +18,11 @@ export default function RootLayout({
       </head>
       <body>
         <Theme>
-          {children}
-          <Toaster position="top-right" richColors />
+          <AuthProvider>
+            {children}
+            <Toaster position="top-right" richColors />
+            <UploadModal />
+          </AuthProvider>
         </Theme>
       </body>
     </html>
