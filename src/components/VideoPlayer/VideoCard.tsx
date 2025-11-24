@@ -1,18 +1,18 @@
 "use client";
 import React from "react";
-import Image from "next/image";
-import { Play, Clock, Eye, Heart, MessageCircle, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Play, Clock, Heart, MessageCircle, Trash2 } from "lucide-react";
 import { Box, Card, Inset } from "@radix-ui/themes";
 import { Button } from "@radix-ui/themes";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
+import { VideoPlayer } from "./VideoPlayer";
 
 interface VideoCardProps {
   id: string;
   title: string;
   description: string;
-  thumbnail: string;
   duration?: string;
   category: string;
   likesCount: number;
@@ -21,17 +21,16 @@ interface VideoCardProps {
   username: string;
   userId: string;
   currentUserId?: string;
+  videoUrl?: string;
   onDelete?: () => void;
   onLikeToggle?: () => void;
-  onVideoClick?: () => void;
 }
 
 export const VideoCard = ({
   id,
   title,
   description,
-  thumbnail,
-  duration = "10:24",
+  duration,
   category,
   likesCount,
   commentsCount,
@@ -39,10 +38,11 @@ export const VideoCard = ({
   username,
   userId,
   currentUserId,
+  videoUrl,
   onDelete,
   onLikeToggle,
-  onVideoClick,
 }: VideoCardProps) => {
+  const router = useRouter();
   const [isLiked, setIsLiked] = useState(userHasLiked);
   const [likes, setLikes] = useState(likesCount);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,28 +130,45 @@ export const VideoCard = ({
     }
   };
 
+  // ✅ Función para navegar a la página del video
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/video/${id}`);
+  };
+
+  // ✅ También navegar al hacer click en toda la card
+  const handleCardClick = () => {
+    router.push(`/video/${id}`);
+  };
+
   return (
     <Box>
-      <Card className="rounded-lg text-card-foreground group overflow-hidden border-0 shadow-card transition-all hover:shadow-card-hover cursor-pointer">
+      <Card
+        className="rounded-lg text-card-foreground group overflow-hidden border-0 shadow-card transition-all hover:shadow-card-hover cursor-pointer"
+        onClick={handleCardClick}
+      >
         <Inset clip="padding-box" side="top" pb="current">
-          <div
-            className="relative aspect-video overflow-hidden bg-muted rounded-t-lg"
-            onClick={onVideoClick}
-          >
-            {/*<Image
-          src={thumbnail}
-          alt={title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />*/}
+          <div className="relative aspect-video overflow-hidden bg-muted rounded-t-lg">
+            <VideoPlayer
+              src={videoUrl || ""}
+              autoPlay={false}
+              showControls={false}
+            />
+
             <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm hover:scale-110 transition-transform"
+                onClick={handlePlayClick}
+              >
                 <Play className="h-6 w-6 text-primary fill-primary ml-1" />
               </div>
             </div>
+
             <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
               <Clock className="inline h-3 w-3 mr-1" />
               {duration}
             </div>
+
             <div className="absolute top-2 left-2 rounded-full bg-black/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
               {category}
             </div>

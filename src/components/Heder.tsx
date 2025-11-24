@@ -1,6 +1,5 @@
 "use client";
-import { AvatarIcon } from "@radix-ui/react-icons";
-import { Video, Upload, LogOut } from "lucide-react";
+import { Video, Upload, LogOut, Search } from "lucide-react";
 import Link from "next/link";
 import { useUploadModal } from "@/hooks/useUploadModal";
 import { useAuth } from "@/hooks/context/useAuth";
@@ -43,6 +42,18 @@ export const Header = () => {
             </div>
             <h1 className="text-xl font-bold">VideoHub</h1>
           </Link>
+
+          <li className="mx-4 hidden max-w-lg grow px-2 md:flex">
+            <div className="bg-secondary relative flex grow items-center rounded-lg">
+              <Search className="absolute left-0 size-8 p-2 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Buscar calzado... "
+                className="w-full rounded-md bg-transparent border border-gray-200 py-2 pl-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              />
+            </div>
+          </li>
+
           <section className="flex items-center gap-3">
             {!user && (
               <Link href="/login">
