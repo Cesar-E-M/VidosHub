@@ -57,7 +57,8 @@ export const VideoView = () => {
             title={video.title}
             description={video.description}
             videoUrl={video.video_url}
-            duration={video.duration}
+            thumbnail_url={video.thumbnail_url}
+            duration={parseFloat(video.duration)}
             category={video.category}
             likesCount={video.likes_count}
             commentsCount={video.comments_count}

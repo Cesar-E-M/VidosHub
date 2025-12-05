@@ -6,10 +6,6 @@ interface ToastProps {
   variant?: "default" | "destructive" | "success";
 }
 
-/**
- * Hook personalizado para mostrar notificaciones toast
- * Usa Sonner por debajo para las notificaciones
- */
 export const useToast = () => {
   const toast = ({ title, description, variant = "default" }: ToastProps) => {
     const message = description ? `${title}: ${description}` : title;

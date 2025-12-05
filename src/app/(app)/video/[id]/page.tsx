@@ -25,7 +25,6 @@ interface VideoData {
   title: string;
   description: string;
   video_url: string;
-  duration: string;
   category: string;
   user_id: string;
   created_at: string;
@@ -39,6 +38,7 @@ interface VideoData {
 interface Comment {
   id: string;
   comment: string;
+  content: string;
   created_at: string;
   user_id: string;
   profiles: {
@@ -74,12 +74,12 @@ export default function VideoPage() {
           .from("videos")
           .select(
             `
-            *,
-            profiles!videos_user_id_fkey (
-              full_name,
-              email
-            )
-          `
+          *,
+          profiles!videos_user_id_fkey (
+            full_name,
+            email
+          )
+        `
           )
           .eq("id", videoId)
           .single();
@@ -98,31 +98,20 @@ export default function VideoPage() {
 
         setLikesCount(likesCount || 0);
 
-        if (user) {
-          const { data: likeData } = await supabase
-            .from("video_likes")
-            .select("id")
-            .eq("video_id", videoId)
-            .eq("user_id", user.id)
-            .single();
-
-          setIsLiked(!!likeData);
-        }
-
         const { data: commentsData, error: commentsError } = await supabase
           .from("video_comments")
           .select(
             `
-            *,
-            profiles!video_comments_user_id_fkey (
-              full_name,
-              email
-            )
-          `
+          *,
+          profiles!video_comments_user_id_fkey (
+            full_name,
+            email
+          )
+        `
           )
           .eq("video_id", videoId)
           .order("created_at", { ascending: false });
-        console.log("Comments data:", commentsData, "Error:", commentsError);
+
         if (!commentsError && commentsData) {
           setComments(commentsData);
         }
@@ -140,7 +129,27 @@ export default function VideoPage() {
     };
 
     fetchVideoData();
-  }, []);
+  }, [videoId]);
+
+  useEffect(() => {
+    if (!videoId || !user) {
+      setIsLiked(false);
+      return;
+    }
+
+    const checkUserLike = async () => {
+      const { data: likeData } = await supabase
+        .from("video_likes")
+        .select("id")
+        .eq("video_id", videoId)
+        .eq("user_id", user.id)
+        .single();
+
+      setIsLiked(!!likeData);
+    };
+
+    checkUserLike();
+  }, [videoId, user]);
 
   const handleLike = async () => {
     if (!user) {
@@ -161,14 +170,22 @@ export default function VideoPage() {
           .eq("user_id", user.id);
 
         setIsLiked(false);
-        setLikesCount((prev) => prev - 1);
+        setLikesCount(likesCount - 1);
+        toast({
+          title: "Like eliminado",
+          description: "Ya no te gusta este video",
+        });
       } else {
         await supabase
           .from("video_likes")
           .insert({ video_id: videoId, user_id: user.id });
 
         setIsLiked(true);
-        setLikesCount((prev) => prev + 1);
+        setLikesCount(likesCount + 1);
+        toast({
+          title: "Like agregado",
+          description: "Te gusta este video",
+        });
       }
     } catch (error) {
       console.error("Error al dar like:", error);
@@ -197,7 +214,7 @@ export default function VideoPage() {
         .insert({
           video_id: videoId,
           user_id: user.id,
-          comment: newComment.trim(),
+          content: newComment.trim(),
         })
         .select(
           `
@@ -262,19 +279,17 @@ export default function VideoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/">
-            <Button variant="ghost" className="gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Volver
-            </Button>
-          </Link>
-        </div>
+    <div className="px-8 min-h-screen bg-gray-50">
+      <div className="mx-auto py-4">
+        <Link href="/" className="inline-block">
+          <button className="flex items-center gap-2 text-red-500 cursor-pointer hover:underline">
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </button>
+        </Link>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className=" mx-auto py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-black rounded-lg overflow-hidden aspect-video">
@@ -290,10 +305,6 @@ export default function VideoPage() {
                 <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm font-medium">
                   {video.category}
                 </span>
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <Clock className="h-4 w-4" />
-                  {video.duration}
-                </div>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 {video.title}
@@ -431,7 +442,7 @@ export default function VideoPage() {
                             </span>
                           </div>
                           <p className="text-gray-700 text-sm">
-                            {comment.comment}
+                            {comment.content}
                           </p>
                         </div>
                       </div>
@@ -442,8 +453,8 @@ export default function VideoPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg p-4 sticky top-4">
+          <div className="lg:col-span-1 border border-gray-200 rounded-md h-fit">
+            <div className="bg-white rounded-lg p-4">
               <h3 className="font-bold text-lg mb-4">Videos relacionados</h3>
               <p className="text-sm text-gray-500 text-center py-8">
                 Próximamente...

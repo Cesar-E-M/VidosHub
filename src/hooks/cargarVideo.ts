@@ -7,6 +7,7 @@ interface Video {
   title: string;
   description: string;
   video_url: string;
+  thumbnail_url: string;
   duration: string;
   category: string;
   user_id: string;
@@ -29,8 +30,6 @@ export const useVideos = () => {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      console.log("📹 Cargando videos...");
-
       // 1. Obtener todos los videos con información del perfil del usuario
       const { data: videosData, error: videosError } = await supabase
         .from("videos")
@@ -49,8 +48,6 @@ export const useVideos = () => {
         console.error("❌ Error obteniendo videos:", videosError);
         throw videosError;
       }
-
-      console.log("✅ Videos obtenidos:", videosData);
 
       // 2. Obtener estadísticas para cada video
       const videosWithStats = await Promise.all(
@@ -91,6 +88,7 @@ export const useVideos = () => {
             title: video.title,
             description: video.description,
             video_url: video.video_url,
+            thumbnail_url: video.thumbnail_url,
             duration: video.duration || "0:00",
             category: video.category,
             user_id: video.user_id,
@@ -103,7 +101,6 @@ export const useVideos = () => {
         })
       );
 
-      console.log("✅ Videos con estadísticas:", videosWithStats);
       setVideos(videosWithStats);
       setError(null);
     } catch (err) {

@@ -20,7 +20,23 @@ export default function RootLayout({
         <Theme>
           <AuthProvider>
             {children}
-            <Toaster position="top-right" richColors />
+            <Toaster
+              position="top-right"
+              richColors
+              theme="dark" // o "dark"
+              toastOptions={{
+                style: {
+                  background: "white",
+                  color: "#1f2937",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "0.75rem",
+                  fontSize: "14px",
+                  padding: "16px",
+                },
+                className: "custom-toast",
+                duration: 4000,
+              }}
+            />
             <UploadModal />
           </AuthProvider>
         </Theme>

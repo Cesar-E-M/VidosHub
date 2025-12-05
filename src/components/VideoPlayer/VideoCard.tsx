@@ -1,36 +1,36 @@
 "use client";
-import React from "react";
-import { useRouter } from "next/navigation";
-import { Play, Clock, Heart, MessageCircle, Trash2 } from "lucide-react";
-import { Box, Card, Inset } from "@radix-ui/themes";
-import { Button } from "@radix-ui/themes";
+
+import Image from "next/image";
+import Link from "next/link";
+import { Heart, MessageCircle, Trash2, Clock } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
-import { VideoPlayer } from "./VideoPlayer";
 
 interface VideoCardProps {
   id: string;
   title: string;
   description: string;
-  duration?: string;
-  category: string;
+  videoUrl: string;
+  thumbnail_url: string;
+  duration?: number;
+  category?: string;
   likesCount: number;
   commentsCount: number;
   userHasLiked: boolean;
-  username: string;
+  username?: string;
   userId: string;
   currentUserId?: string;
-  videoUrl?: string;
   onDelete?: () => void;
   onLikeToggle?: () => void;
+  previewMode?: boolean; // Nueva prop
 }
 
 export const VideoCard = ({
   id,
   title,
   description,
-  duration,
+  thumbnail_url,
   category,
   likesCount,
   commentsCount,
@@ -38,28 +38,30 @@ export const VideoCard = ({
   username,
   userId,
   currentUserId,
-  videoUrl,
   onDelete,
   onLikeToggle,
+  previewMode = true,
 }: VideoCardProps) => {
-  const router = useRouter();
   const [isLiked, setIsLiked] = useState(userHasLiked);
   const [likes, setLikes] = useState(likesCount);
   const [isLoading, setIsLoading] = useState(false);
+  //const supabaseClient = supabase();
   const { toast } = useToast();
 
   const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
 
     if (!currentUserId) {
       toast({
-        title: "Debes iniciar sesión",
-        description: "Inicia sesión para dar like a los videos",
+        title: "Error",
+        description: "Debes iniciar sesión para dar like",
         variant: "destructive",
       });
       return;
     }
 
+    if (isLoading) return;
     setIsLoading(true);
 
     try {
@@ -73,24 +75,33 @@ export const VideoCard = ({
         if (error) throw error;
 
         setIsLiked(false);
-        setLikes((prev) => prev - 1);
+        setLikes(likes - 1);
+
+        toast({
+          title: "Like eliminado",
+          description: "Ya no te gusta este video",
+        });
       } else {
-        const { error } = await supabase
-          .from("video_likes")
-          .insert({ video_id: id, user_id: currentUserId });
+        const { error } = await supabase.from("video_likes").insert({
+          video_id: id,
+          user_id: currentUserId,
+        });
 
         if (error) throw error;
 
         setIsLiked(true);
-        setLikes((prev) => prev + 1);
-      }
+        setLikes(likes + 1);
 
-      onLikeToggle?.();
-    } catch (error: unknown) {
+        toast({
+          title: "Like agregado",
+          description: "Te gusta este video",
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Ocurrió un error",
+        description: "No se pudo actualizar el like",
         variant: "destructive",
       });
     } finally {
@@ -99,30 +110,39 @@ export const VideoCard = ({
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
 
-    if (!confirm("¿Estás seguro de que quieres eliminar este video?")) {
+    if (!window.confirm("¿Estás seguro de eliminar este video?")) {
       return;
     }
 
+    if (isLoading) return;
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from("videos").delete().eq("id", id);
+      await supabase.from("video_likes").delete().eq("video_id", id);
+      await supabase.from("video_comments").delete().eq("video_id", id);
+
+      const { error } = await supabase
+        .from("videos")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", currentUserId);
 
       if (error) throw error;
 
       toast({
         title: "Video eliminado",
-        description: "El video ha sido eliminado exitosamente",
+        description: "El video se eliminó correctamente",
       });
 
       onDelete?.();
-    } catch (error: unknown) {
+    } catch (error) {
+      console.error("Error deleting video:", error);
       toast({
         title: "Error",
-        description:
-          error instanceof Error ? error.message : "Ocurrió un error",
+        description: "No se pudo eliminar el video",
         variant: "destructive",
       });
     } finally {
@@ -130,95 +150,85 @@ export const VideoCard = ({
     }
   };
 
-  // ✅ Función para navegar a la página del video
-  const handlePlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/video/${id}`);
-  };
-
-  // ✅ También navegar al hacer click en toda la card
-  const handleCardClick = () => {
-    router.push(`/video/${id}`);
-  };
-
   return (
-    <Box>
-      <Card
-        className="rounded-lg text-card-foreground group overflow-hidden border-0 shadow-card transition-all hover:shadow-card-hover cursor-pointer"
-        onClick={handleCardClick}
-      >
-        <Inset clip="padding-box" side="top" pb="current">
-          <div className="relative aspect-video overflow-hidden bg-muted rounded-t-lg">
-            <VideoPlayer
-              src={videoUrl || ""}
-              autoPlay={false}
-              showControls={false}
+    <Link href={`/video/${id}`} className="group">
+      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+        <div className="relative aspect-video bg-gray-200 overflow-hidden">
+          {thumbnail_url ? (
+            <Image
+              src={thumbnail_url}
+              alt={title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-
-            <div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-              <div
-                className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm hover:scale-110 transition-transform"
-                onClick={handlePlayClick}
-              >
-                <Play className="h-6 w-6 text-primary fill-primary ml-1" />
-              </div>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-300">
+              <span className="text-gray-500 text-sm">Sin miniatura</span>
             </div>
+          )}
 
-            <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-              <Clock className="inline h-3 w-3 mr-1" />
-              {duration}
-            </div>
-
-            <div className="absolute top-2 left-2 rounded-full bg-black/80 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+          {category && (
+            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
               {category}
             </div>
-          </div>
+          )}
+        </div>
 
-          <div className="p-4">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="text-gray-400 font-semibold text-lg line-clamp-2 group-hover:text-primary transition-colors flex-1">
-                {title}
-              </h3>
-              {currentUserId === userId && (
-                <Button
-                  variant="ghost"
-                  size="1"
-                  className="h-8 w-8 text-destructive hover:text-destructive"
-                  onClick={handleDelete}
-                  disabled={isLoading}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+        <div className="p-4">
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-red-500 transition-colors">
+            {title}
+          </h3>
 
-            <p className="text-sm text-muted-foreground mb-2">@{username}</p>
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {description}
+          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            {description}
+          </p>
+
+          {username && (
+            <p className="text-xs text-gray-500 mb-3">
+              Por: <span className="font-medium">{username}</span>
             </p>
+          )}
 
-            <div className="flex items-center gap-4 text-sm">
-              <Button
-                variant="ghost"
-                size="1"
-                className={`gap-1 h-8 ${
-                  isLiked ? "text-primary" : "text-muted-foreground"
-                }`}
+          <div
+            className="flex items-center justify-between"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
                 onClick={handleLike}
                 disabled={isLoading}
+                className="flex items-center gap-1 text-sm hover:text-red-500 transition-colors"
               >
-                <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+                <Heart
+                  className={`h-5 w-5 ${
+                    isLiked ? "fill-red-500 text-red-500" : ""
+                  }`}
+                />
                 <span>{likes}</span>
-              </Button>
+              </button>
 
-              <div className="flex items-center gap-1 text-muted-foreground">
-                <MessageCircle className="h-4 w-4" />
+              <div className="flex items-center gap-1 text-sm text-gray-600">
+                <MessageCircle className="h-5 w-5" />
                 <span>{commentsCount}</span>
               </div>
             </div>
+
+            {currentUserId === userId && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isLoading}
+                className="p-2 hover:bg-red-50 rounded-full transition-colors group cursor-pointer"
+                title="Eliminar video"
+              >
+                <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+              </button>
+            )}
           </div>
-        </Inset>
-      </Card>
-    </Box>
+        </div>
+      </div>
+    </Link>
   );
 };
