@@ -42,9 +42,16 @@ export const VideoControls = ({
       className={`absolute bottom-0 left-0 w-full p-4 flex items-center bg-black bg-opacity-75 ${
         isPlaying ? "hidden group-hover:flex" : ""
       }`}
+      onClick={(e) => e.stopPropagation()}
     >
       <div className="flex items-center justify-between gap-3 w-full">
-        <button className="text-white focus:outline-none" onClick={togglePlay}>
+        <button
+          className="text-white focus:outline-none cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePlay();
+          }}
+        >
           {isPlaying ? <BsPauseFill size={24} /> : <BsFillPlayFill size={24} />}
         </button>
 
@@ -59,6 +66,7 @@ export const VideoControls = ({
               step={1}
               value={progress}
               onChange={handleProgressChange}
+              onClick={(e) => e.stopPropagation()}
             />
             <div
               className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
@@ -71,17 +79,19 @@ export const VideoControls = ({
         <div className="flex items-center">
           <input
             type="range"
-            className="w-16 h-1.5 bg-gray-600 rounded-full mr-2"
+            className="w-16 h-1.5 bg-gray-600 rounded-full mr-2 cursor-pointer"
             min={0}
             max={1}
             step={0.1}
             value={volume}
             onChange={handleVolumeChange}
+            onClick={(e) => e.stopPropagation()}
           />
           <select
             className="bg-black text-white px-2 py-1 rounded-md focus:outline-none"
             value={playbackRate}
             onChange={handlePlaybackRateChange}
+            onClick={(e) => e.stopPropagation()}
           >
             <option value="0.5">0.5x</option>
             <option value="1">1x</option>
@@ -91,8 +101,11 @@ export const VideoControls = ({
         </div>
 
         <button
-          className="text-white focus:outline-none"
-          onClick={toggleFullScreen}
+          className="text-white focus:outline-none cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFullScreen();
+          }}
         >
           <MdFullscreen size={24} />
         </button>

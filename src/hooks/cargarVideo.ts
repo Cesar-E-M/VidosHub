@@ -113,7 +113,7 @@ export const useVideos = () => {
 
   useEffect(() => {
     fetchVideos();
-  }, [user]);
+  }, [user?.id]);
 
   return { videos, loading, error, refetch: fetchVideos };
 };

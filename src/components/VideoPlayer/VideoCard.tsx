@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MessageCircle, Trash2, Clock } from "lucide-react";
-import { useState } from "react";
+import { Heart, MessageCircle, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
 
@@ -22,8 +22,6 @@ interface VideoCardProps {
   userId: string;
   currentUserId?: string;
   onDelete?: () => void;
-  onLikeToggle?: () => void;
-  previewMode?: boolean; // Nueva prop
 }
 
 export const VideoCard = ({
@@ -39,14 +37,19 @@ export const VideoCard = ({
   userId,
   currentUserId,
   onDelete,
-  onLikeToggle,
-  previewMode = true,
 }: VideoCardProps) => {
   const [isLiked, setIsLiked] = useState(userHasLiked);
   const [likes, setLikes] = useState(likesCount);
   const [isLoading, setIsLoading] = useState(false);
-  //const supabaseClient = supabase();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsLiked(userHasLiked);
+  }, [userHasLiked]);
+
+  useEffect(() => {
+    setLikes(likesCount);
+  }, [likesCount]);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -161,6 +164,7 @@ export const VideoCard = ({
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="eager"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-300">
@@ -199,7 +203,7 @@ export const VideoCard = ({
                 type="button"
                 onClick={handleLike}
                 disabled={isLoading}
-                className="flex items-center gap-1 text-sm hover:text-red-500 transition-colors"
+                className="flex items-center gap-1 text-sm hover:text-red-500 transition-colors cursor-pointer"
               >
                 <Heart
                   className={`h-5 w-5 ${

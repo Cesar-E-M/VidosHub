@@ -5,17 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/context/useAuth";
 import { VideoPlayer } from "@/components/VideoPlayer/VideoPlayer";
-import {
-  Heart,
-  MessageCircle,
-  Share2,
-  ThumbsDown,
-  Clock,
-  Eye,
-  Calendar,
-  Loader2,
-  ArrowLeft,
-} from "lucide-react";
+import { Heart, Share2, Eye, Calendar, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@radix-ui/themes";
 import { useToast } from "@/hooks/useToast";
 import Link from "next/link";
@@ -28,7 +18,6 @@ interface VideoData {
   category: string;
   user_id: string;
   created_at: string;
-  views_count: number;
   profiles: {
     full_name: string;
     email: string;
@@ -61,10 +50,13 @@ export default function VideoPage() {
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
+  const [viewsCount, setViewsCount] = useState(0);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   useEffect(() => {
     if (!videoId) return;
+
+    let isViewRecorded = false; // Bandera para evitar múltiples registros
 
     const fetchVideoData = async () => {
       try {
@@ -89,7 +81,45 @@ export default function VideoPage() {
 
         setVideo(videoData);
 
-        await supabase.rpc("increment_video_views", { video_id: videoId });
+        // Contar vistas desde la tabla video_views
+        const { count: totalViews } = await supabase
+          .from("video_views")
+          .select("*", { count: "exact", head: true })
+          .eq("video_id", videoId);
+
+        setViewsCount(totalViews || 0);
+
+        // Incrementar vistas solo una vez por usuario
+        if (user && !isViewRecorded) {
+          isViewRecorded = true;
+
+          try {
+            const { error: insertError, status } = await supabase
+              .from("video_views")
+              .upsert(
+                {
+                  video_id: videoId,
+                  user_id: user.id,
+                },
+                {
+                  onConflict: "video_id,user_id",
+                  ignoreDuplicates: true, // ← Ignorar duplicados
+                }
+              );
+
+            // Solo incrementar si fue un insert nuevo (status 201), no un update (status 200)
+            if (!insertError && status === 201) {
+              console.log("✅ Vista registrada para el usuario:", user.id);
+              setViewsCount((prev) => prev + 1);
+            } else if (status === 200) {
+              console.log("ℹ️ Usuario ya vio este video");
+            } else if (insertError) {
+              console.error("❌ Error registrando vista:", insertError);
+            }
+          } catch (error) {
+            console.error("❌ Error en registro de vista:", error);
+          }
+        }
 
         const { count: likesCount } = await supabase
           .from("video_likes")
@@ -129,7 +159,8 @@ export default function VideoPage() {
     };
 
     fetchVideoData();
-  }, [videoId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId, user?.id]);
 
   useEffect(() => {
     if (!videoId || !user) {
@@ -143,7 +174,7 @@ export default function VideoPage() {
         .select("id")
         .eq("video_id", videoId)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       setIsLiked(!!likeData);
     };
@@ -248,6 +279,45 @@ export default function VideoPage() {
     }
   };
 
+  // Web Share API
+  const handleShare = async () => {
+    const shareData = {
+      title: video?.title,
+      text: video?.description || `Mira este video: ${video?.title}`,
+      url: window.location.href,
+    };
+
+    try {
+      // Verificar si el navegador soporta Web Share API
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast({
+          title: "Compartido",
+          description: "Video compartido exitosamente",
+          variant: "success",
+        });
+      } else {
+        // Fallback: copiar al portapapeles
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Enlace copiado",
+          description: "El enlace se copió al portapapeles",
+          variant: "success",
+        });
+      }
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        // AbortError ocurre cuando el usuario cancela el diálogo de compartir
+        console.error("Error al compartir:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo compartir el video",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("es-ES", {
@@ -315,7 +385,7 @@ export default function VideoPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
-                    {video.profiles.full_name?.charAt(0) || "U"}
+                    {video.profiles?.full_name?.charAt(0) || "U"}
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">
@@ -331,17 +401,18 @@ export default function VideoPage() {
                   <Button
                     variant={isLiked ? "solid" : "soft"}
                     color={isLiked ? "red" : "gray"}
-                    className="gap-2"
                     onClick={handleLike}
                   >
                     <Heart
-                      className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`}
+                      className={`h-4 w-4 cursor-pointer ${
+                        isLiked ? "fill-current" : ""
+                      }`}
                     />
                     {likesCount}
                   </Button>
 
-                  <Button variant="soft" color="gray">
-                    <Share2 className="h-4 w-4" />
+                  <Button variant="soft" color="gray" onClick={handleShare}>
+                    <Share2 className="h-4 w-4 cursor-pointer" />
                   </Button>
                 </div>
               </div>
@@ -350,7 +421,7 @@ export default function VideoPage() {
                 <div className="flex gap-4 text-sm text-gray-500 mb-3">
                   <div className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {video.views_count || 0} vistas
+                    {viewsCount} vistas
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />

@@ -67,7 +67,6 @@ export const VideoView = () => {
             userId={video.user_id}
             currentUserId={user?.id}
             onDelete={refetch}
-            onLikeToggle={refetch}
           />
         ))}
       </div>

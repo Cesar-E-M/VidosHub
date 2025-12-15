@@ -134,7 +134,7 @@ export const Header = () => {
 
                   <button
                     onClick={handleLogout}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
                     title="Cerrar sesión"
                   >
                     <LogOut className="h-5 w-5 text-gray-600" />

@@ -8,26 +8,48 @@ import {
   X,
   Video as VideoIcon,
   Image as ImageIcon,
+  AlertCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
-import { useAuth } from "@/hooks/context/useAuth"; // ✅ Importar useAuth
-import Image from "next/image"; // ✅ Importación correcta
+import { useAuth } from "@/hooks/context/useAuth";
+import Image from "next/image";
+import { useForm, Controller } from "react-hook-form";
+
+interface FormData {
+  title: string;
+  description: string;
+  category: string;
+  video: FileList;
+  thumbnail: FileList;
+}
 
 export const UploadModal = () => {
   const { isOpen, onClose } = useUploadModal();
   const { toast } = useToast();
-  const { user } = useAuth(); // ✅ Obtener usuario autenticado
+  const { user } = useAuth();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<FormData>({
+    defaultValues: {
+      title: "",
+      description: "",
+      category: "general",
+    },
+  });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null); // ✅ Preview separado
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "general",
-  });
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+
+  // Observar archivos seleccionados
+  const videoFile = watch("video")?.[0];
+  const thumbnailFile = watch("thumbnail")?.[0];
 
   const categories = [
     "general",
@@ -40,86 +62,26 @@ export const UploadModal = () => {
     "noticias",
   ];
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validar tamaño
-      if (file.size > 100 * 1024 * 1024) {
-        toast({
-          title: "Archivo muy grande",
-          description: "El video no debe superar los 100MB",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // ✅ Validar tipo
-      if (!file.type.startsWith("video/")) {
-        toast({
-          title: "Tipo incorrecto",
-          description: "Debes seleccionar un archivo de video",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setVideoFile(file);
-      console.log("✅ Video seleccionado:", file.name);
-    }
-  };
-
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validar tamaño
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Imagen muy grande",
-          description: "La miniatura no debe superar los 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // ✅ Validar tipo de imagen
-      if (!file.type.startsWith("image/")) {
-        toast({
-          title: "Tipo incorrecto",
-          description: "Debes seleccionar una imagen (JPG, PNG, WebP)",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // ✅ Limpiar preview anterior
       if (thumbnailPreview) {
         URL.revokeObjectURL(thumbnailPreview);
       }
-
-      // ✅ Crear nuevo preview
       const previewUrl = URL.createObjectURL(file);
-      setThumbnailFile(file);
       setThumbnailPreview(previewUrl);
-      console.log("✅ Thumbnail seleccionado:", file.name);
     }
   };
 
-  // ✅ Limpiar preview al cerrar
   const resetForm = () => {
-    setFormData({ title: "", description: "", category: "general" });
-    setVideoFile(null);
-    setThumbnailFile(null);
-
+    reset();
     if (thumbnailPreview) {
       URL.revokeObjectURL(thumbnailPreview);
       setThumbnailPreview(null);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // ✅ Validar usuario autenticado
+  const onSubmit = async (data: FormData) => {
     if (!user) {
       toast({
         title: "No autenticado",
@@ -129,39 +91,21 @@ export const UploadModal = () => {
       return;
     }
 
-    if (!videoFile || !thumbnailFile) {
-      toast({
-        title: "Faltan archivos",
-        description: "Debes seleccionar un video y una miniatura",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.title.trim()) {
-      toast({
-        title: "Título requerido",
-        description: "El video debe tener un título",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      console.log("🚀 Iniciando subida...");
+      const video = data.video[0];
+      const thumbnail = data.thumbnail[0];
 
       // 1. Subir video
-      const videoFileName = `${user.id}/${Date.now()}-${videoFile.name.replace(
+      const videoFileName = `${user.id}/${Date.now()}-${video.name.replace(
         /\s+/g,
         "-"
       )}`;
-      console.log("📹 Subiendo video:", videoFileName);
 
       const { error: videoError, data: videoData } = await supabase.storage
         .from("videos")
-        .upload(videoFileName, videoFile, {
+        .upload(videoFileName, video, {
           cacheControl: "3600",
           upsert: false,
         });
@@ -174,36 +118,24 @@ export const UploadModal = () => {
       console.log("✅ Video subido:", videoData);
 
       // 2. Subir miniatura
-      const thumbnailFileName = `${user.id}/${Date.now()}-${thumbnailFile.name
+      const thumbnailFileName = `${user.id}/${Date.now()}-${thumbnail.name
         .replace(/\s+/g, "-")
-        .replace(/[^a-zA-Z0-9.-]/g, "_")}`; // ✅ Sanitizar nombre
+        .replace(/[^a-zA-Z0-9.-]/g, "_")}`;
 
       console.log("🖼️ Subiendo miniatura a:", thumbnailFileName);
-      console.log("📦 Bucket: thumbnails");
-      console.log(
-        "📄 Archivo:",
-        thumbnailFile.name,
-        `(${(thumbnailFile.size / 1024).toFixed(2)}KB)`
-      );
 
       const { error: thumbnailError, data: thumbnailData } =
         await supabase.storage
           .from("thumbnails")
-          .upload(thumbnailFileName, thumbnailFile, {
+          .upload(thumbnailFileName, thumbnail, {
             cacheControl: "3600",
             upsert: false,
-            contentType: thumbnailFile.type, // ✅ Especificar content type
+            contentType: thumbnail.type,
           });
 
       if (thumbnailError) {
-        console.error("❌ Error completo al subir thumbnail:", thumbnailError);
-        console.error("❌ Detalles:", {
-          message: thumbnailError.message,
-        });
-
-        // ✅ Si falla el thumbnail, eliminar el video ya subido
+        console.error("❌ Error al subir thumbnail:", thumbnailError);
         await supabase.storage.from("videos").remove([videoFileName]);
-
         throw new Error(`Error al subir miniatura: ${thumbnailError.message}`);
       }
 
@@ -229,9 +161,9 @@ export const UploadModal = () => {
       const { error: dbError, data: dbData } = await supabase
         .from("videos")
         .insert({
-          title: formData.title.trim(),
-          description: formData.description.trim() || null,
-          category: formData.category,
+          title: data.title.trim(),
+          description: data.description.trim() || null,
+          category: data.category,
           video_url: videoUrl.publicUrl,
           thumbnail_url: thumbnailUrl.publicUrl,
           user_id: user.id,
@@ -242,11 +174,8 @@ export const UploadModal = () => {
 
       if (dbError) {
         console.error("❌ Error en BD:", dbError);
-
-        // ✅ Limpiar archivos si falla la BD
         await supabase.storage.from("videos").remove([videoFileName]);
         await supabase.storage.from("thumbnails").remove([thumbnailFileName]);
-
         throw new Error(`Error al guardar: ${dbError.message}`);
       }
 
@@ -255,12 +184,12 @@ export const UploadModal = () => {
       toast({
         title: "¡Video subido!",
         description: "Tu video ha sido publicado exitosamente",
+        variant: "success",
       });
 
       resetForm();
       onClose();
 
-      // Recargar para mostrar el nuevo video
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -281,13 +210,19 @@ export const UploadModal = () => {
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <Dialog.Content style={{ maxWidth: 600 }}>
+      <Dialog.Content
+        style={{ maxWidth: 600 }}
+        aria-describedby="upload-dialog-description"
+      >
         <Dialog.Title className="flex items-center gap-2">
           <VideoIcon className="h-5 w-5 text-red-500" />
           Subir Video
         </Dialog.Title>
+        <Dialog.Description id="upload-dialog-description" className="sr-only">
+          Completa el formulario para subir un nuevo video a la plataforma.
+        </Dialog.Description>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
           {/* Video Upload */}
           <div>
             <label className="block text-sm font-medium mb-2">
@@ -310,11 +245,36 @@ export const UploadModal = () => {
               <input
                 type="file"
                 accept="video/mp4,video/webm,video/ogg"
-                onChange={handleVideoChange}
+                {...register("video", {
+                  required: "El video es obligatorio",
+                  validate: {
+                    fileSize: (files) => {
+                      if (!files?.[0]) return true;
+                      const maxSize = 100 * 1024 * 1024; // 100MB
+                      return (
+                        files[0].size <= maxSize ||
+                        "El video no debe superar los 100MB"
+                      );
+                    },
+                    fileType: (files) => {
+                      if (!files?.[0]) return true;
+                      return (
+                        files[0].type.startsWith("video/") ||
+                        "Debe ser un archivo de video válido"
+                      );
+                    },
+                  },
+                })}
                 className="hidden"
                 disabled={isLoading}
               />
             </label>
+            {errors.video && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors.video.message}</span>
+              </div>
+            )}
           </div>
 
           {/* Thumbnail Upload */}
@@ -330,7 +290,7 @@ export const UploadModal = () => {
                     alt="Preview miniatura"
                     fill
                     className="object-cover"
-                    unoptimized // ✅ Necesario para URLs blob
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <p className="text-white text-sm font-medium">
@@ -352,11 +312,37 @@ export const UploadModal = () => {
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/jpg"
-                onChange={handleThumbnailChange}
+                {...register("thumbnail", {
+                  required: "La miniatura es obligatoria",
+                  validate: {
+                    fileSize: (files) => {
+                      if (!files?.[0]) return true;
+                      const maxSize = 5 * 1024 * 1024; // 5MB
+                      return (
+                        files[0].size <= maxSize ||
+                        "La imagen no debe superar los 5MB"
+                      );
+                    },
+                    fileType: (files) => {
+                      if (!files?.[0]) return true;
+                      return (
+                        files[0].type.startsWith("image/") ||
+                        "Debe ser una imagen válida (JPG, PNG, WebP)"
+                      );
+                    },
+                  },
+                  onChange: handleThumbnailChange,
+                })}
                 className="hidden"
                 disabled={isLoading}
               />
             </label>
+            {errors.thumbnail && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors.thumbnail.message}</span>
+              </div>
+            )}
           </div>
 
           {/* Title */}
@@ -366,12 +352,25 @@ export const UploadModal = () => {
             </label>
             <TextField.Root
               placeholder="Título del video"
-              value={formData.title}
-              onChange={(e) =>
-                setFormData({ ...formData, title: e.target.value })
-              }
+              {...register("title", {
+                required: "El título es obligatorio",
+                minLength: {
+                  value: 3,
+                  message: "El título debe tener al menos 3 caracteres",
+                },
+                maxLength: {
+                  value: 100,
+                  message: "El título no debe superar los 100 caracteres",
+                },
+              })}
               disabled={isLoading}
             />
+            {errors.title && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors.title.message}</span>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -381,34 +380,53 @@ export const UploadModal = () => {
             </label>
             <TextArea
               placeholder="Describe tu video..."
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
-              }
+              {...register("description", {
+                maxLength: {
+                  value: 500,
+                  message: "La descripción no debe superar los 500 caracteres",
+                },
+              })}
               disabled={isLoading}
               rows={4}
             />
+            {errors.description && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors.description.message}</span>
+              </div>
+            )}
           </div>
 
           {/* Category */}
           <div>
             <label className="block text-sm font-medium mb-2">Categoría</label>
-            <Select.Root
-              value={formData.category}
-              onValueChange={(value) =>
-                setFormData({ ...formData, category: value })
-              }
-              disabled={isLoading}
-            >
-              <Select.Trigger className="w-full" />
-              <Select.Content>
-                {categories.map((cat) => (
-                  <Select.Item key={cat} value={cat}>
-                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
+            <Controller
+              name="category"
+              control={control}
+              rules={{ required: "La categoría es obligatoria" }}
+              render={({ field }) => (
+                <Select.Root
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={isLoading}
+                >
+                  <Select.Trigger className="w-full" />
+                  <Select.Content>
+                    {categories.map((cat) => (
+                      <Select.Item key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              )}
+            />
+            {errors.category && (
+              <div className="flex items-center gap-1 mt-1 text-red-500 text-sm">
+                <AlertCircle className="h-4 w-4" />
+                <span>{errors.category.message}</span>
+              </div>
+            )}
           </div>
 
           {/* Actions */}
@@ -428,7 +446,7 @@ export const UploadModal = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="bg-linear-to-r from-[#ef4343] to-[#ff5724] text-white" // ✅ Clase corregida
+              className="bg-linear-to-r from-[#ef4343] to-[#ff5724] text-white"
             >
               {isLoading ? "Subiendo..." : "Publicar Video"}
             </Button>
