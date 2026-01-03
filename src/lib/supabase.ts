@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createBrowserClient } from "@supabase/ssr";
 
 // Obtener las variables de entorno
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -11,5 +11,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Crear y exportar el cliente de Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Crear y exportar el cliente de Supabase para navegador
+export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey);
