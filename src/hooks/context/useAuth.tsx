@@ -39,16 +39,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
+
+    // Verificar que el usuario tenga el email confirmado
+    if (data.user && !data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      throw new Error(
+        "Por favor confirma tu correo antes de iniciar sesión. Revisa tu bandeja de entrada."
+      );
+    }
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -60,6 +68,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (error) throw error;
+
+    // Verificar si el usuario necesita confirmar el email
+    if (data.user && !data.user.email_confirmed_at) {
+      // El usuario se creó pero necesita confirmar su email
+      // No permitir acceso hasta que confirme
+      await supabase.auth.signOut();
+    }
   };
 
   const signInWithGoogle = async () => {

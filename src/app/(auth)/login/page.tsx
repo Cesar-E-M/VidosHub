@@ -6,6 +6,11 @@ import { useAuth } from "@/hooks/context/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import {
+  validateEmail,
+  normalizeEmail,
+  isValidGmailFormat,
+} from "@/lib/emailValidation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,6 +18,7 @@ export default function LoginPage() {
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -23,6 +29,12 @@ export default function LoginPage() {
     password: "",
     confirmPassword: "",
   });
+
+  // Validación en tiempo real
+  const isLoginEmailInvalid =
+    loginData.email.length > 0 && !isValidGmailFormat(loginData.email);
+  const isRegisterEmailInvalid =
+    registerData.email.length > 0 && !isValidGmailFormat(registerData.email);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +48,27 @@ export default function LoginPage() {
       return;
     }
 
+    // Normalizar el email
+    const normalizedEmail = normalizeEmail(loginData.email);
+
+    // Validación completa del correo
+    setIsValidatingEmail(true);
+    const validation = await validateEmail(normalizedEmail);
+    setIsValidatingEmail(false);
+
+    if (!validation.valid) {
+      toast({
+        title: "Correo inválido",
+        description: validation.errors[0] || "El correo no es válido",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await signIn(loginData.email, loginData.password);
+      await signIn(normalizedEmail, loginData.password);
 
       toast({
         title: "¡Bienvenido!",
@@ -71,6 +100,23 @@ export default function LoginPage() {
       return;
     }
 
+    // Normalizar el email
+    const normalizedEmail = normalizeEmail(registerData.email);
+
+    // Validación completa del correo
+    setIsValidatingEmail(true);
+    const validation = await validateEmail(normalizedEmail);
+    setIsValidatingEmail(false);
+
+    if (!validation.valid) {
+      toast({
+        title: "Correo inválido",
+        description: validation.errors.join(". "),
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (registerData.password !== registerData.confirmPassword) {
       toast({
         title: "Las contraseñas no coinciden",
@@ -92,15 +138,12 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await signUp(
-        registerData.email,
-        registerData.password,
-        registerData.name
-      );
+      await signUp(normalizedEmail, registerData.password, registerData.name);
 
       toast({
         title: "¡Cuenta creada!",
-        description: "Por favor revisa tu correo para confirmar tu cuenta",
+        description:
+          "Por favor revisa tu correo para confirmar tu cuenta. Solo podrás usar la cuenta después de verificar tu email.",
       });
 
       // No redirigir automáticamente, esperar confirmación de email
@@ -181,14 +224,23 @@ export default function LoginPage() {
                 <input
                   id="email"
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder="tu@gmail.com"
                   value={loginData.email}
                   onChange={(e) =>
                     setLoginData({ ...loginData, email: e.target.value })
                   }
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                    isLoginEmailInvalid
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
+                {isLoginEmailInvalid && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Solo se permiten correos de Gmail (@gmail.com)
+                  </p>
+                )}
               </div>
 
               <div>
@@ -213,11 +265,17 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isValidatingEmail}
                 className="w-full py-3 px-4 bg-linear-to-r from-[#ef4343] to-[#ff5724] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+                {(isLoading || isValidatingEmail) && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                {isValidatingEmail
+                  ? "Validando correo..."
+                  : isLoading
+                    ? "Iniciando sesión..."
+                    : "Iniciar Sesión"}
               </button>
             </form>
 
@@ -298,14 +356,23 @@ export default function LoginPage() {
                 <input
                   id="register-email"
                   type="email"
-                  placeholder="tu@email.com"
+                  placeholder="tu@gmail.com"
                   value={registerData.email}
                   onChange={(e) =>
                     setRegisterData({ ...registerData, email: e.target.value })
                   }
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                    isRegisterEmailInvalid
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
+                {isRegisterEmailInvalid && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Solo se permiten correos de Gmail (@gmail.com)
+                  </p>
+                )}
               </div>
 
               <div>
@@ -356,11 +423,17 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isValidatingEmail}
                 className="w-full py-3 px-4 bg-linear-to-r from-[#ef4343] to-[#ff5724] text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
+                {(isLoading || isValidatingEmail) && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                {isValidatingEmail
+                  ? "Validando correo..."
+                  : isLoading
+                    ? "Creando cuenta..."
+                    : "Crear Cuenta"}
               </button>
             </form>
 
