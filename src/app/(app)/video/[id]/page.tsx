@@ -397,7 +397,7 @@ export default function VideoPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-2 mt-2 sm:mt-0">
                   <Button
                     variant={isLiked ? "solid" : "soft"}
                     color={isLiked ? "red" : "gray"}
