@@ -36,7 +36,6 @@ export const VideoCard = ({
   username,
   userId,
   currentUserId,
-  onDelete,
 }: VideoCardProps) => {
   const [isLiked, setIsLiked] = useState(userHasLiked);
   const [likes, setLikes] = useState(likesCount);

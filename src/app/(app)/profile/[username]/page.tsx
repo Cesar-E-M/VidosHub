@@ -143,10 +143,6 @@ const ProfilePage = () => {
     }
 
     try {
-      // Eliminar registros relacionados primero
-      await supabase.from("video_likes").delete().eq("video_id", videoId);
-      await supabase.from("video_comments").delete().eq("video_id", videoId);
-
       // Eliminar el video
       const { error } = await supabase
         .from("videos")
