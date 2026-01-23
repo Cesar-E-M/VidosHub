@@ -143,14 +143,9 @@ const ProfilePage = () => {
     }
 
     try {
-      // 1. Encontrar el video en el estado local para obtener las URLs
-      const videoToDelete = videos.find((v) => v.id === videoId);
+      console.log("🗑️ Iniciando eliminación del video:", videoId);
 
-      if (!videoToDelete) {
-        throw new Error("Video no encontrado");
-      }
-
-      // 2. Obtener las URLs completas desde la base de datos
+      // 1. Obtener las URLs completas desde la base de datos ANTES de eliminar
       const { data: videoData, error: fetchError } = await supabase
         .from("videos")
         .select("video_url, thumbnail_url")
@@ -158,43 +153,44 @@ const ProfilePage = () => {
         .single();
 
       if (fetchError) {
-        console.error("Error al obtener video:", fetchError);
+        console.error("❌ Error al obtener video:", fetchError);
+        throw new Error("No se pudo obtener la información del video");
       }
 
-      // 3. Eliminar el video de la base de datos (CASCADE eliminará likes y comentarios)
-      const { error: deleteError } = await supabase
-        .from("videos")
-        .delete()
-        .eq("id", videoId)
-        .eq("user_id", user?.id);
+      console.log("📦 Datos del video:", videoData);
 
-      if (deleteError) throw deleteError;
+      // 2. Eliminar archivos del Storage PRIMERO (antes de la BD)
+      const storageErrors = [];
 
-      // 4. Eliminar archivos del Storage (después de eliminar el registro)
       if (videoData?.video_url) {
-        // Extraer el path: user-id/filename.mp4
-        const videoPath = videoData.video_url.split(
-          "/storage/v1/object/public/videos/",
-        )[1];
+        // Extraer el path después de /videos/
+        // Ejemplo URL: https://xxx.supabase.co/storage/v1/object/public/videos/user-id/file.mp4
+        const urlParts = videoData.video_url.split("/videos/");
+        const videoPath = urlParts[1];
+
+        console.log("🎥 Eliminando video del storage:", videoPath);
+
         if (videoPath) {
           const { error: videoStorageError } = await supabase.storage
             .from("videos")
             .remove([videoPath]);
 
           if (videoStorageError) {
-            console.error(
-              "Error al eliminar video del storage:",
-              videoStorageError,
-            );
+            console.error("❌ Error al eliminar video:", videoStorageError);
+            storageErrors.push(`Video: ${videoStorageError.message}`);
+          } else {
+            console.log("✅ Video eliminado del storage");
           }
         }
       }
 
       if (videoData?.thumbnail_url) {
-        // Extraer el path: user-id/filename.png
-        const thumbnailPath = videoData.thumbnail_url.split(
-          "/storage/v1/object/public/thumbnails/",
-        )[1];
+        // Extraer el path después de /thumbnails/
+        const urlParts = videoData.thumbnail_url.split("/thumbnails/");
+        const thumbnailPath = urlParts[1];
+
+        console.log("🖼️ Eliminando thumbnail del storage:", thumbnailPath);
+
         if (thumbnailPath) {
           const { error: thumbnailStorageError } = await supabase.storage
             .from("thumbnails")
@@ -202,22 +198,51 @@ const ProfilePage = () => {
 
           if (thumbnailStorageError) {
             console.error(
-              "Error al eliminar thumbnail del storage:",
+              "❌ Error al eliminar thumbnail:",
               thumbnailStorageError,
             );
+            storageErrors.push(`Thumbnail: ${thumbnailStorageError.message}`);
+          } else {
+            console.log("✅ Thumbnail eliminado del storage");
           }
         }
       }
 
-      toast({
-        title: "Video eliminado",
-        description: "El video y sus archivos se eliminaron correctamente",
-      });
+      // 3. Eliminar el registro de la base de datos
+      console.log("🗄️ Eliminando registro de la BD...");
+
+      const { error: deleteError } = await supabase
+        .from("videos")
+        .delete()
+        .eq("id", videoId)
+        .eq("user_id", user?.id);
+
+      if (deleteError) {
+        console.error("❌ Error al eliminar de BD:", deleteError);
+        throw deleteError;
+      }
+
+      console.log("✅ Video eliminado de la BD");
+
+      // 4. Mostrar resultado
+      if (storageErrors.length > 0) {
+        toast({
+          title: "Video eliminado parcialmente",
+          description: `El video fue eliminado pero hubo errores con archivos: ${storageErrors.join(", ")}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Video eliminado",
+          description:
+            "El video y todos sus archivos se eliminaron correctamente",
+        });
+      }
 
       // 5. Actualizar UI
       setVideos(videos.filter((v) => v.id !== videoId));
     } catch (error) {
-      console.error("Error deleting video:", error);
+      console.error("💥 Error general al eliminar:", error);
       toast({
         title: "Error",
         description:
