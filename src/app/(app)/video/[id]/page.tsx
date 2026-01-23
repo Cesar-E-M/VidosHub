@@ -71,7 +71,7 @@ export default function VideoPage() {
             full_name,
             email
           )
-        `
+        `,
           )
           .eq("id", videoId)
           .single();
@@ -104,7 +104,7 @@ export default function VideoPage() {
                 {
                   onConflict: "video_id,user_id",
                   ignoreDuplicates: true, // ← Ignorar duplicados
-                }
+                },
               );
 
             // Solo incrementar si fue un insert nuevo (status 201), no un update (status 200)
@@ -137,7 +137,7 @@ export default function VideoPage() {
             full_name,
             email
           )
-        `
+        `,
           )
           .eq("video_id", videoId)
           .order("created_at", { ascending: false });
@@ -254,7 +254,7 @@ export default function VideoPage() {
             full_name,
             email
           )
-        `
+        `,
         )
         .single();
 
@@ -382,7 +382,7 @@ export default function VideoPage() {
             </div>
 
             <div className="bg-white rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col items-center mb-4 sm:flex-row sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
                     {video.profiles?.full_name?.charAt(0) || "U"}
