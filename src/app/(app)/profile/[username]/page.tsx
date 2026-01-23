@@ -143,27 +143,87 @@ const ProfilePage = () => {
     }
 
     try {
-      // Eliminar el video
-      const { error } = await supabase
+      // 1. Encontrar el video en el estado local para obtener las URLs
+      const videoToDelete = videos.find((v) => v.id === videoId);
+
+      if (!videoToDelete) {
+        throw new Error("Video no encontrado");
+      }
+
+      // 2. Obtener las URLs completas desde la base de datos
+      const { data: videoData, error: fetchError } = await supabase
+        .from("videos")
+        .select("video_url, thumbnail_url")
+        .eq("id", videoId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error al obtener video:", fetchError);
+      }
+
+      // 3. Eliminar el video de la base de datos (CASCADE eliminará likes y comentarios)
+      const { error: deleteError } = await supabase
         .from("videos")
         .delete()
         .eq("id", videoId)
-        .eq("user_id", user?.id); // ✅ Usar user.id del contexto
+        .eq("user_id", user?.id);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
+
+      // 4. Eliminar archivos del Storage (después de eliminar el registro)
+      if (videoData?.video_url) {
+        // Extraer el path: user-id/filename.mp4
+        const videoPath = videoData.video_url.split(
+          "/storage/v1/object/public/videos/",
+        )[1];
+        if (videoPath) {
+          const { error: videoStorageError } = await supabase.storage
+            .from("videos")
+            .remove([videoPath]);
+
+          if (videoStorageError) {
+            console.error(
+              "Error al eliminar video del storage:",
+              videoStorageError,
+            );
+          }
+        }
+      }
+
+      if (videoData?.thumbnail_url) {
+        // Extraer el path: user-id/filename.png
+        const thumbnailPath = videoData.thumbnail_url.split(
+          "/storage/v1/object/public/thumbnails/",
+        )[1];
+        if (thumbnailPath) {
+          const { error: thumbnailStorageError } = await supabase.storage
+            .from("thumbnails")
+            .remove([thumbnailPath]);
+
+          if (thumbnailStorageError) {
+            console.error(
+              "Error al eliminar thumbnail del storage:",
+              thumbnailStorageError,
+            );
+          }
+        }
+      }
 
       toast({
         title: "Video eliminado",
-        description: "El video se eliminó correctamente",
+        description: "El video y sus archivos se eliminaron correctamente",
       });
 
-      // ✅ Actualizar la lista de videos localmente
+      // 5. Actualizar UI
       setVideos(videos.filter((v) => v.id !== videoId));
     } catch (error) {
       console.error("Error deleting video:", error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar el video",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo eliminar el video",
         variant: "destructive",
       });
     }
