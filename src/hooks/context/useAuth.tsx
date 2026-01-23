@@ -4,8 +4,18 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 
+interface Profile {
+  id: string;
+  full_name: string | null;
+  username: string | null;
+  email: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
+  profile: Profile | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
@@ -14,17 +24,41 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
+  undefined,
 ) as React.Context<AuthContextType | undefined>;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Función para cargar el perfil
+  const loadProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error loading profile:", error);
+        return;
+      }
+
+      setProfile(data);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+  };
 
   useEffect(() => {
     // Verificar sesión actual
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadProfile(session.user.id);
+      }
       setLoading(false);
     });
 
@@ -33,6 +67,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        loadProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -50,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (data.user && !data.user.email_confirmed_at) {
       await supabase.auth.signOut();
       throw new Error(
-        "Por favor confirma tu correo antes de iniciar sesión. Revisa tu bandeja de entrada."
+        "Por favor confirma tu correo antes de iniciar sesión. Revisa tu bandeja de entrada.",
       );
     }
   };
@@ -93,11 +132,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+    setProfile(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, signIn, signUp, signInWithGoogle, signOut }}
+      value={{
+        user,
+        profile,
+        loading,
+        signIn,
+        signUp,
+        signInWithGoogle,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

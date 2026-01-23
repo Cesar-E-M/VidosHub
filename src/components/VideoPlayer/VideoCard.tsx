@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
 
-interface VideoCardProps {
+export interface VideoCardProps {
   id: string;
   title: string;
   description: string;
@@ -112,47 +112,6 @@ export const VideoCard = ({
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!window.confirm("¿Estás seguro de eliminar este video?")) {
-      return;
-    }
-
-    if (isLoading) return;
-    setIsLoading(true);
-
-    try {
-      await supabase.from("video_likes").delete().eq("video_id", id);
-      await supabase.from("video_comments").delete().eq("video_id", id);
-
-      const { error } = await supabase
-        .from("videos")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", currentUserId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Video eliminado",
-        description: "El video se eliminó correctamente",
-      });
-
-      onDelete?.();
-    } catch (error) {
-      console.error("Error deleting video:", error);
-      toast({
-        title: "Error",
-        description: "No se pudo eliminar el video",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <Link href={`/video/${id}`} className="group">
       <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
@@ -218,18 +177,6 @@ export const VideoCard = ({
                 <span>{commentsCount}</span>
               </div>
             </div>
-
-            {currentUserId === userId && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isLoading}
-                className="p-2 hover:bg-red-50 rounded-full transition-colors group cursor-pointer"
-                title="Eliminar video"
-              >
-                <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
-              </button>
-            )}
           </div>
         </div>
       </div>

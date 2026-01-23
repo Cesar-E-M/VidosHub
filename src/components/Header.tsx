@@ -8,9 +8,10 @@ import { useToast } from "@/hooks/useToast";
 import { useVideoSearch } from "@/hooks/useVideoSearch";
 import { SearchDropdown } from "@/components/SearchDropdown";
 import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
 
 export const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const { onOpen } = useUploadModal();
   const router = useRouter();
   const { toast } = useToast();
@@ -170,16 +171,27 @@ export const Header = () => {
                 <div className="flex relative" ref={menuRef}>
                   <button
                     onClick={toggleMenu}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-[#ef4343] to-[#ff5724] text-white font-semibold hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-red-400"
+                    className="flex items-center justify-center w-10 h-10 rounded-full overflow-hidden bg-gray-200 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-red-400"
                   >
-                    <User className="h-5 w-5" />
+                    {profile?.avatar_url ? (
+                      <Image
+                        src={profile.avatar_url}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                        width={500}
+                        height={500}
+                      />
+                    ) : (
+                      <User className="h-5 w-5 text-gray-600" />
+                    )}
                   </button>
 
                   {isAbierto && (
                     <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100">
                       <Link
-                        href="/perfil"
+                        href="/profile/me"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsAbierto(false)}
                       >
                         Mi Perfil
                       </Link>

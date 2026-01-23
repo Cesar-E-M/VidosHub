@@ -5,12 +5,16 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "rgsbdffijuwsmchathjj.supabase.co",
+        hostname: "lh3.googleusercontent.com",
         port: "",
-        pathname: "/storage/v1/object/public/**",
+        pathname: "/**",
       },
     ],
   },
+  // turbopack: {
+  //   // root: "./src/app",
+  //   enabled: false,
+  // },
 };
 
 export default nextConfig;
