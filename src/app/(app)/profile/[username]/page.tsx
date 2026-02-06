@@ -141,7 +141,6 @@ const ProfilePage = () => {
     if (!window.confirm("¿Estás seguro de eliminar este video?")) {
       return;
     }
-
     try {
       console.log("🗑️ Iniciando eliminación del video:", videoId);
 
