@@ -49,7 +49,6 @@ export const UploadModal = () => {
 
   // Observar archivos seleccionados
   const videoFile = watch("video")?.[0];
-  const thumbnailFile = watch("thumbnail")?.[0];
 
   const categories = [
     "general",
@@ -100,10 +99,10 @@ export const UploadModal = () => {
       // 1. Subir video
       const videoFileName = `${user.id}/${Date.now()}-${video.name.replace(
         /\s+/g,
-        "-"
+        "-",
       )}`;
 
-      const { error: videoError, data: videoData } = await supabase.storage
+      const { error: videoError } = await supabase.storage
         .from("videos")
         .upload(videoFileName, video, {
           cacheControl: "3600",
@@ -115,14 +114,10 @@ export const UploadModal = () => {
         throw new Error(`Error al subir video: ${videoError.message}`);
       }
 
-      console.log("✅ Video subido:", videoData);
-
       // 2. Subir miniatura
       const thumbnailFileName = `${user.id}/${Date.now()}-${thumbnail.name
         .replace(/\s+/g, "-")
         .replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-
-      console.log("🖼️ Subiendo miniatura a:", thumbnailFileName);
 
       const { error: thumbnailError, data: thumbnailData } =
         await supabase.storage
@@ -154,9 +149,6 @@ export const UploadModal = () => {
         video: videoUrl.publicUrl,
         thumbnail: thumbnailUrl.publicUrl,
       });
-
-      // 4. Guardar en la base de datos
-      console.log("💾 Guardando en BD...");
 
       const { error: dbError, data: dbData } = await supabase
         .from("videos")
@@ -277,7 +269,6 @@ export const UploadModal = () => {
             )}
           </div>
 
-          {/* Thumbnail Upload */}
           <div>
             <label className="block text-sm font-medium mb-2">
               Miniatura <span className="text-red-500">*</span>
@@ -345,7 +336,6 @@ export const UploadModal = () => {
             )}
           </div>
 
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium mb-2">
               Título <span className="text-red-500">*</span>
@@ -373,7 +363,6 @@ export const UploadModal = () => {
             )}
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium mb-2">
               Descripción
@@ -397,7 +386,6 @@ export const UploadModal = () => {
             )}
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-medium mb-2">Categoría</label>
             <Controller
@@ -429,7 +417,6 @@ export const UploadModal = () => {
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex gap-3 justify-end pt-4">
             <Button
               type="button"

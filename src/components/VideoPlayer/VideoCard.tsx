@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, MessageCircle, Trash2 } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
@@ -34,7 +34,6 @@ export const VideoCard = ({
   commentsCount,
   userHasLiked,
   username,
-  userId,
   currentUserId,
 }: VideoCardProps) => {
   const [isLiked, setIsLiked] = useState(userHasLiked);

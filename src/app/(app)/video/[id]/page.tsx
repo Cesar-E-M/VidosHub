@@ -56,7 +56,7 @@ export default function VideoPage() {
   useEffect(() => {
     if (!videoId) return;
 
-    let isViewRecorded = false; // Bandera para evitar múltiples registros
+    let isViewRecorded = false;
 
     const fetchVideoData = async () => {
       try {
@@ -81,7 +81,6 @@ export default function VideoPage() {
 
         setVideo(videoData);
 
-        // Contar vistas desde la tabla video_views
         const { count: totalViews } = await supabase
           .from("video_views")
           .select("*", { count: "exact", head: true })
@@ -89,7 +88,6 @@ export default function VideoPage() {
 
         setViewsCount(totalViews || 0);
 
-        // Incrementar vistas solo una vez por usuario
         if (user && !isViewRecorded) {
           isViewRecorded = true;
 
@@ -103,18 +101,12 @@ export default function VideoPage() {
                 },
                 {
                   onConflict: "video_id,user_id",
-                  ignoreDuplicates: true, // ← Ignorar duplicados
+                  ignoreDuplicates: true,
                 },
               );
 
-            // Solo incrementar si fue un insert nuevo (status 201), no un update (status 200)
             if (!insertError && status === 201) {
-              console.log("✅ Vista registrada para el usuario:", user.id);
               setViewsCount((prev) => prev + 1);
-            } else if (status === 200) {
-              console.log("ℹ️ Usuario ya vio este video");
-            } else if (insertError) {
-              console.error("❌ Error registrando vista:", insertError);
             }
           } catch (error) {
             console.error("❌ Error en registro de vista:", error);
@@ -279,7 +271,6 @@ export default function VideoPage() {
     }
   };
 
-  // Web Share API
   const handleShare = async () => {
     const shareData = {
       title: video?.title,
@@ -288,7 +279,6 @@ export default function VideoPage() {
     };
 
     try {
-      // Verificar si el navegador soporta Web Share API
       if (navigator.share) {
         await navigator.share(shareData);
         toast({
@@ -297,7 +287,6 @@ export default function VideoPage() {
           variant: "success",
         });
       } else {
-        // Fallback: copiar al portapapeles
         await navigator.clipboard.writeText(window.location.href);
         toast({
           title: "Enlace copiado",
@@ -307,7 +296,6 @@ export default function VideoPage() {
       }
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
-        // AbortError ocurre cuando el usuario cancela el diálogo de compartir
         console.error("Error al compartir:", error);
         toast({
           title: "Error",

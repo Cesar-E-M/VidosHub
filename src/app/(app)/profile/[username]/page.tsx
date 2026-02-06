@@ -34,7 +34,6 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Cargar perfil del usuario autenticado
   useEffect(() => {
     const loadProfile = async () => {
       if (authLoading) return;
@@ -47,7 +46,6 @@ const ProfilePage = () => {
       try {
         setLoading(true);
 
-        // Obtener perfil del usuario
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
@@ -56,7 +54,6 @@ const ProfilePage = () => {
 
         if (profileError) throw profileError;
 
-        // Obtener videos del usuario
         const { data: videosData, error: videosError } = await supabase
           .from("videos")
           .select("*")
@@ -65,7 +62,6 @@ const ProfilePage = () => {
 
         if (videosError) throw videosError;
 
-        // Formatear datos del perfil
         const userProfile: UserProfile = {
           id: profileData.id,
           username: profileData.username || user.email?.split("@")[0] || "user",
@@ -79,7 +75,6 @@ const ProfilePage = () => {
 
         setPerfile(userProfile);
 
-        // Formatear videos
         const formattedVideos: Video[] =
           videosData?.map((video) => ({
             id: video.id,
@@ -142,9 +137,6 @@ const ProfilePage = () => {
       return;
     }
     try {
-      console.log("🗑️ Iniciando eliminación del video:", videoId);
-
-      // 1. Obtener las URLs completas desde la base de datos ANTES de eliminar
       const { data: videoData, error: fetchError } = await supabase
         .from("videos")
         .select("video_url, thumbnail_url")
@@ -156,18 +148,11 @@ const ProfilePage = () => {
         throw new Error("No se pudo obtener la información del video");
       }
 
-      console.log("📦 Datos del video:", videoData);
-
-      // 2. Eliminar archivos del Storage PRIMERO (antes de la BD)
       const storageErrors = [];
 
       if (videoData?.video_url) {
-        // Extraer el path después de /videos/
-        // Ejemplo URL: https://xxx.supabase.co/storage/v1/object/public/videos/user-id/file.mp4
         const urlParts = videoData.video_url.split("/videos/");
         const videoPath = urlParts[1];
-
-        console.log("🎥 Eliminando video del storage:", videoPath);
 
         if (videoPath) {
           const { error: videoStorageError } = await supabase.storage
@@ -177,18 +162,13 @@ const ProfilePage = () => {
           if (videoStorageError) {
             console.error("❌ Error al eliminar video:", videoStorageError);
             storageErrors.push(`Video: ${videoStorageError.message}`);
-          } else {
-            console.log("✅ Video eliminado del storage");
           }
         }
       }
 
       if (videoData?.thumbnail_url) {
-        // Extraer el path después de /thumbnails/
         const urlParts = videoData.thumbnail_url.split("/thumbnails/");
         const thumbnailPath = urlParts[1];
-
-        console.log("🖼️ Eliminando thumbnail del storage:", thumbnailPath);
 
         if (thumbnailPath) {
           const { error: thumbnailStorageError } = await supabase.storage
@@ -201,14 +181,9 @@ const ProfilePage = () => {
               thumbnailStorageError,
             );
             storageErrors.push(`Thumbnail: ${thumbnailStorageError.message}`);
-          } else {
-            console.log("✅ Thumbnail eliminado del storage");
           }
         }
       }
-
-      // 3. Eliminar el registro de la base de datos
-      console.log("🗄️ Eliminando registro de la BD...");
 
       const { error: deleteError } = await supabase
         .from("videos")
@@ -221,8 +196,6 @@ const ProfilePage = () => {
         throw deleteError;
       }
 
-      console.log("✅ Video eliminado de la BD");
-
       // 4. Mostrar resultado
       if (storageErrors.length > 0) {
         toast({
@@ -233,8 +206,7 @@ const ProfilePage = () => {
       } else {
         toast({
           title: "Video eliminado",
-          description:
-            "El video y todos sus archivos se eliminaron correctamente",
+          description: "El video fue eliminado correctamente.",
         });
       }
 
@@ -289,7 +261,6 @@ const ProfilePage = () => {
             )}
           </div>
 
-          {/* User Info */}
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               {perfile.displayName}
@@ -309,7 +280,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Videos Section */}
         <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Historial de Videos ({videos.length})
@@ -327,7 +297,6 @@ const ProfilePage = () => {
                   href={`/video/${video.id}`}
                   className="group cursor-pointer"
                 >
-                  {/* Thumbnail */}
                   <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow mb-3">
                     <Image
                       src={video.thumbnail}
@@ -336,7 +305,6 @@ const ProfilePage = () => {
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
 
-                    {/* Play Icon Overlay */}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                       <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center transition-all">
                         <Play className="w-6 h-6 text-transparent group-hover:text-gray-900 transition-all fill-current" />
@@ -344,7 +312,6 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  {/* Video Info */}
                   <div className="flex justify-between items-start">
                     <div className="flex-col">
                       <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-primary transition-colors mb-2">
