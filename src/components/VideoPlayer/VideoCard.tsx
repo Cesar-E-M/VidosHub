@@ -112,7 +112,7 @@ export const VideoCard = ({
 
   return (
     <Link href={`/video/${id}`} className="group">
-      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300">
+      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full">
         <div className="relative aspect-video bg-gray-200 overflow-hidden">
           {thumbnail_url ? (
             <Image

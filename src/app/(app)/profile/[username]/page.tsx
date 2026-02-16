@@ -332,10 +332,10 @@ const ProfilePage = () => {
                     <button
                       type="button"
                       onClick={(e) => handleDelete(video.id, e)}
-                      className="p-2 hover:bg-red-50 rounded-full transition-colors group cursor-pointer"
+                      className="p-2 hover:text-red-500 rounded-full transition-colors group cursor-pointer"
                       title="Eliminar video"
                     >
-                      <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                      <Trash2 className="h-4 w-4 text-gray-400" />
                     </button>
                   </div>
                 </Link>

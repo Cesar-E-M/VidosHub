@@ -52,11 +52,11 @@ export const UploadModal = () => {
 
   const categories = [
     "general",
-    "educacion",
+    "educación",
     "gaming",
-    "musica",
+    "música",
     "deportes",
-    "tecnologia",
+    "tecnología",
     "entretenimiento",
     "noticias",
   ];

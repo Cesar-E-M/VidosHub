@@ -474,12 +474,12 @@ export default function LoginPage() {
               Continuar con Google
             </button>
 
-            <p className="text-center text-sm text-gray-600">
+            {/* <p className="text-center text-sm text-gray-600">
               Al registrarte, aceptas nuestros{" "}
               <a href="#" className="text-red-500 hover:text-red-600">
                 Términos y Condiciones
               </a>
-            </p>
+            </p> */}
           </Tabs.Content>
         </Tabs.Root>
       </div>
