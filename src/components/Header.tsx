@@ -199,7 +199,7 @@ export const Header = () => {
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={onOpen}
-                        className="sm:hidden flex cursor-pointer  items-center rounded-xl px-4 justify-center gap-2 h-10 text-white font-medium bg-linear-to-r from-[#ef4343] to-[#ff5724] text-sm hover:opacity-90 transition-opacity"
+                        className="sm:hidden flex cursor-pointer  items-center rounded-xl px-4 justify-center gap-2 h-10 text-white font-medium text-sm hover:opacity-90 transition-opacity"
                       >
                         <Upload className="h-5 w-5" />
                         Subir Video
