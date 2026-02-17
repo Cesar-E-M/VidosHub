@@ -196,7 +196,7 @@ export const Header = () => {
                         Mi Perfil
                       </Link>
 
-                      <hr className="my-1 border-gray-100" />
+                      {/*<hr className="my-1 border-gray-100" />*/}
                       <button
                         onClick={onOpen}
                         className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 cursor-pointer"
@@ -204,7 +204,7 @@ export const Header = () => {
                         <Upload className="inline-block mr-2 h-4 w-4" />
                         Subir Video
                       </button>
-                      <hr className="my-1 border-gray-100 sm:hidden" />
+                      {/*<hr className="my-1 border-gray-100" />*/}
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
