@@ -11,6 +11,7 @@ import {
   normalizeEmail,
   isValidGmailFormat,
 } from "@/lib/emailValidation";
+import { set } from "react-hook-form";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -29,6 +30,24 @@ export default function LoginPage() {
     password: "",
     confirmPassword: "",
   });
+
+  // Estados para validación de campos vacíos
+  const [loginErrors, setLoginErrors] = useState({
+    email: false,
+    password: false,
+  });
+  const [registerErrors, setRegisterErrors] = useState({
+    name: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
+
+  const errors = {
+    email: !loginData.email,
+    password: !loginData.password,
+  };
+  setLoginErrors(errors);
 
   // Validación en tiempo real
   const isLoginEmailInvalid =
@@ -90,6 +109,14 @@ export default function LoginPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = {
+      name: !registerData.name,
+      email: !registerData.email,
+      password: !registerData.password,
+      confirmPassword: !registerData.confirmPassword,
+    };
+    setRegisterErrors(errors);
 
     if (!registerData.name || !registerData.email || !registerData.password) {
       toast({
@@ -226,16 +253,24 @@ export default function LoginPage() {
                   type="email"
                   placeholder="tu@gmail.com"
                   value={loginData.email}
-                  onChange={(e) =>
-                    setLoginData({ ...loginData, email: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setLoginData({ ...loginData, email: e.target.value });
+                    setLoginErrors({ ...loginErrors, email: false });
+                  }}
                   disabled={isLoading}
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
-                    isLoginEmailInvalid
+                    loginErrors.email
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : isLoginEmailInvalid
+                        ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
+                {loginErrors.email && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo
+                  </p>
+                )}
                 {isLoginEmailInvalid && (
                   <p className="mt-1 text-sm text-red-600">
                     Solo se permiten correos de Gmail (@gmail.com)
@@ -255,12 +290,22 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   value={loginData.password}
-                  onChange={(e) =>
-                    setLoginData({ ...loginData, password: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setLoginData({ ...loginData, password: e.target.value });
+                    setLoginErrors({ ...loginErrors, password: false });
+                  }}
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                    loginErrors.password
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
+                {loginErrors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo
+                  </p>
+                )}
               </div>
 
               <button
@@ -338,12 +383,22 @@ export default function LoginPage() {
                   type="text"
                   placeholder="Juan Pérez"
                   value={registerData.name}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, name: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setRegisterData({ ...registerData, name: e.target.value });
+                    setRegisterErrors({ ...registerErrors, name: false });
+                  }}
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                    registerErrors.name
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
+                {registerErrors.name && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo
+                  </p>
+                )}
               </div>
 
               <div>
@@ -358,19 +413,28 @@ export default function LoginPage() {
                   type="email"
                   placeholder="tu@gmail.com"
                   value={registerData.email}
-                  onChange={(e) =>
-                    setRegisterData({ ...registerData, email: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setRegisterData({ ...registerData, email: e.target.value });
+                    setRegisterErrors({ ...registerErrors, email: false });
+                  }}
                   disabled={isLoading}
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
-                    isRegisterEmailInvalid
+                    registerErrors.email
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : isRegisterEmailInvalid
+                        ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {isRegisterEmailInvalid && (
                   <p className="mt-1 text-sm text-red-600">
                     Solo se permiten correos de Gmail (@gmail.com)
+                  </p>
+                )}
+
+                {registerErrors && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo.
                   </p>
                 )}
               </div>
@@ -387,14 +451,19 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   value={registerData.password}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setRegisterData({
                       ...registerData,
                       password: e.target.value,
-                    })
-                  }
+                    });
+                    setRegisterErrors({ ...registerErrors, password: false });
+                  }}
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 ${
+                    registerErrors.password
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
               </div>
 
@@ -417,7 +486,11 @@ export default function LoginPage() {
                     })
                   }
                   disabled={isLoading}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
+                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 ${
+                    registerErrors.confirmPassword
+                      ? "border-red-500 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                  }`}
                 />
               </div>
 

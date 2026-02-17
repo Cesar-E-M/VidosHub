@@ -136,7 +136,7 @@ export const VideoCard = ({
           )}
         </div>
 
-        <div className="p-4">
+        <div className="p-4 h-full">
           <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-red-500 transition-colors">
             {title}
           </h3>

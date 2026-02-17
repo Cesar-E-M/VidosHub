@@ -199,12 +199,12 @@ export const Header = () => {
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={onOpen}
-                        className="sm:hidden flex cursor-pointer  items-center rounded-xl px-4 justify-center gap-2 h-10 text-white font-medium text-sm hover:opacity-90 transition-opacity"
+                        className="sm:hidden flex cursor-pointer  items-center rounded-xl px-4 justify-center gap-2 h-10 text-gray-700 font-medium text-sm hover:bg-gray-100"
                       >
                         <Upload className="h-5 w-5" />
                         Subir Video
                       </button>
-                      <hr className="my-1 border-gray-100" />
+                      <hr className="my-1 border-gray-100 sm:hidden" />
                       <button
                         onClick={handleLogout}
                         className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
