@@ -190,7 +190,7 @@ export const Header = () => {
                     <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100">
                       <Link
                         href="/profile/me"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                         onClick={() => setIsAbierto(false)}
                       >
                         Mi Perfil
@@ -199,7 +199,7 @@ export const Header = () => {
                       <hr className="my-1 border-gray-100" />
                       <button
                         onClick={onOpen}
-                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer sm:hidden"
+                        className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 cursor-pointer"
                       >
                         <Upload className="inline-block mr-2 h-4 w-4" />
                         Subir Video
