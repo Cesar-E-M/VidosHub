@@ -11,7 +11,6 @@ import {
   normalizeEmail,
   isValidGmailFormat,
 } from "@/lib/emailValidation";
-import { set } from "react-hook-form";
 
 export default function LoginPage() {
   const router = useRouter();
