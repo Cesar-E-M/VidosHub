@@ -44,12 +44,6 @@ export default function LoginPage() {
     confirmPassword: false,
   });
 
-  const errors = {
-    email: !loginData.email,
-    password: !loginData.password,
-  };
-  setLoginErrors(errors);
-
   // Validación en tiempo real
   const isLoginEmailInvalid =
     loginData.email.length > 0 && !isValidGmailFormat(loginData.email);
