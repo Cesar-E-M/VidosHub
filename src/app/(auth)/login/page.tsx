@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -11,6 +12,7 @@ import {
   normalizeEmail,
   isValidGmailFormat,
 } from "@/lib/emailValidation";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -117,7 +119,12 @@ export default function LoginPage() {
     };
     setRegisterErrors(errors);
 
-    if (!registerData.name || !registerData.email || !registerData.password) {
+    if (
+      !registerData.name ||
+      !registerData.email ||
+      !registerData.password ||
+      !registerData.confirmPassword
+    ) {
       toast({
         title: "Campos vacíos",
         description: "Por favor completa todos los campos",
@@ -164,6 +171,24 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // Verificar si el correo ya está registrado ANTES de intentar registrarse
+      const { data: existingUser } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("email", normalizedEmail)
+        .maybeSingle();
+
+      if (existingUser) {
+        toast({
+          title: "Correo ya registrado",
+          description:
+            "Este correo ya está en uso. Por favor inicia sesión o usa otro correo.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       await signUp(normalizedEmail, registerData.password, registerData.name);
 
       toast({
@@ -172,18 +197,35 @@ export default function LoginPage() {
           "Por favor revisa tu correo para confirmar tu cuenta. Solo podrás usar la cuenta después de verificar tu email.",
       });
 
-      // No redirigir automáticamente, esperar confirmación de email
+      // Limpiar campos
       setRegisterData({
         name: "",
         email: "",
         password: "",
         confirmPassword: "",
       });
-    } catch (error) {
+      setRegisterErrors({
+        name: false,
+        email: false,
+        password: false,
+        confirmPassword: false,
+      });
+    } catch (error: any) {
+      // Manejar diferentes tipos de errores
+      let errorMessage = "No se pudo crear la cuenta";
+
+      if (error?.message?.includes("User already registered")) {
+        errorMessage =
+          "Este correo ya está registrado. Por favor inicia sesión.";
+      } else if (error?.message?.includes("duplicate")) {
+        errorMessage = "Este correo ya está en uso.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Error al registrarse",
-        description:
-          error instanceof Error ? error.message : "No se pudo crear la cuenta",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -425,15 +467,14 @@ export default function LoginPage() {
                         : "border-gray-300 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
-                {isRegisterEmailInvalid && (
+                {registerErrors.email && (
                   <p className="mt-1 text-sm text-red-600">
-                    Solo se permiten correos de Gmail (@gmail.com)
+                    Debe llenar este campo
                   </p>
                 )}
-
-                {registerErrors && (
+                {isRegisterEmailInvalid && !registerErrors.email && (
                   <p className="mt-1 text-sm text-red-600">
-                    Debe llenar este campo.
+                    Solo se permiten correos de Gmail (@gmail.com)
                   </p>
                 )}
               </div>
@@ -458,12 +499,17 @@ export default function LoginPage() {
                     setRegisterErrors({ ...registerErrors, password: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
                     registerErrors.password
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : "border-gray-300 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
+                {registerErrors.password && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo
+                  </p>
+                )}
               </div>
 
               <div>
@@ -478,19 +524,28 @@ export default function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   value={registerData.confirmPassword}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setRegisterData({
                       ...registerData,
                       confirmPassword: e.target.value,
-                    })
-                  }
+                    });
+                    setRegisterErrors({
+                      ...registerErrors,
+                      confirmPassword: false,
+                    });
+                  }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50 ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
                     registerErrors.confirmPassword
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : "border-gray-300 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
+                {registerErrors.confirmPassword && (
+                  <p className="mt-1 text-sm text-red-600">
+                    Debe llenar este campo
+                  </p>
+                )}
               </div>
 
               <button
