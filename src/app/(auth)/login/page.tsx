@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs } from "@radix-ui/themes";
 import { useAuth } from "@/hooks/context/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { user, signIn, signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -56,8 +56,20 @@ export default function LoginPage() {
   const isRegisterEmailInvalid =
     registerData.email.length > 0 && !isValidGmailFormat(registerData.email);
 
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const errors = {
+      email: !loginData.email,
+      password: !loginData.password,
+    };
+    setLoginErrors(errors);
 
     if (!loginData.email || !loginData.password) {
       toast({
@@ -68,10 +80,8 @@ export default function LoginPage() {
       return;
     }
 
-    // Normalizar el email
     const normalizedEmail = normalizeEmail(loginData.email);
 
-    // Validación completa del correo
     setIsValidatingEmail(true);
     const validation = await validateEmail(normalizedEmail);
     setIsValidatingEmail(false);
@@ -79,7 +89,7 @@ export default function LoginPage() {
     if (!validation.valid) {
       toast({
         title: "Correo inválido",
-        description: validation.errors[0] || "El correo no es válido",
+        description: validation.errors.join(". "),
         variant: "destructive",
       });
       return;
@@ -89,18 +99,26 @@ export default function LoginPage() {
 
     try {
       await signIn(normalizedEmail, loginData.password);
-
       toast({
-        title: "¡Bienvenido!",
+        title: "¡Bienvenido de vuelta!",
         description: "Has iniciado sesión correctamente",
       });
+      // La redirección se maneja en el useEffect de arriba
+    } catch (error: any) {
+      let errorMessage = "Credenciales incorrectas";
 
-      router.push("/");
-    } catch (error) {
+      if (error?.message?.includes("Email not confirmed")) {
+        errorMessage =
+          "Por favor confirma tu correo electrónico antes de iniciar sesión";
+      } else if (error?.message?.includes("Invalid login credentials")) {
+        errorMessage = "Correo o contraseña incorrectos";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Error al iniciar sesión",
-        description:
-          error instanceof Error ? error.message : "Credenciales inválidas",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
