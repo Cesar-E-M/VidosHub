@@ -121,7 +121,7 @@ const ProfilePage = () => {
     };
 
     loadProfile();
-  }, [user, authLoading, router, toast]);
+  }, [user, authLoading, router]);
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -314,7 +314,7 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
-                <div key={video.id} className="group">
+                <div key={video.id} className="group relative">
                   <Link href={`/video/${video.id}`} className="cursor-pointer">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow mb-3">
                       <Image
