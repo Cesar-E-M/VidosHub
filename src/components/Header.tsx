@@ -193,17 +193,20 @@ export const Header = () => {
                         className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                         onClick={() => setIsAbierto(false)}
                       >
+                        <User className="inline-block mr-2 h-4 w-4" />
                         Mi Perfil
                       </Link>
 
                       <hr className="my-1 border-gray-100" />
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 cursor-pointer"
+                        className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 cursor-pointer sm:hidden"
                         onClick={onOpen}
                       >
                         <Upload className="inline-block mr-2 h-4 w-4" />
                         Subir Video
                       </button>
+
+                      <hr className="my-1 border-gray-100 sm:hidden" />
 
                       <button
                         onClick={handleLogout}

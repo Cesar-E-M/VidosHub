@@ -7,6 +7,15 @@ import Image from "next/image";
 import { useAuth } from "@/hooks/context/useAuth";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/useToast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@radix-ui/react-alert-dialog";
 
 interface Video {
   id: string;
@@ -32,6 +41,7 @@ const ProfilePage = () => {
   const [perfile, setPerfile] = useState<UserProfile | null>(null);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -75,18 +85,32 @@ const ProfilePage = () => {
 
         setPerfile(userProfile);
 
-        const formattedVideos: Video[] =
-          videosData?.map((video) => ({
-            id: video.id,
-            title: video.title,
-            thumbnail:
-              video.thumbnail_url ||
-              "https://images.unsplash.com/photo-1574267432644-f86ede5aed05?w=640&h=360&fit=crop",
-            duration: formatDuration(video.duration || 0),
-            views: video.views || 0,
-            createdAt: formatTimeAgo(new Date(video.created_at)),
-            userId: video.user_id,
-          })) || [];
+        // ✅ Obtener el conteo de vistas desde video_views para cada video
+        const formattedVideos: Video[] = await Promise.all(
+          (videosData || []).map(async (video) => {
+            // Contar las vistas desde la tabla video_views
+            const { count, error: countError } = await supabase
+              .from("video_views")
+              .select("*", { count: "exact", head: true })
+              .eq("video_id", video.id);
+
+            if (countError) {
+              console.error("Error contando vistas:", countError);
+            }
+
+            return {
+              id: video.id,
+              title: video.title,
+              thumbnail:
+                video.thumbnail_url ||
+                "https://images.unsplash.com/photo-1574267432644-f86ede5aed05?w=640&h=360&fit=crop",
+              duration: formatDuration(video.duration || 0),
+              views: count || 0,
+              createdAt: formatTimeAgo(new Date(video.created_at)),
+              userId: video.user_id,
+            };
+          }),
+        );
 
         setVideos(formattedVideos);
       } catch (error) {
@@ -97,7 +121,7 @@ const ProfilePage = () => {
     };
 
     loadProfile();
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, toast]);
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -129,13 +153,9 @@ const ProfilePage = () => {
     );
   }
 
-  const handleDelete = async (videoId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDelete = async (videoId: string) => {
+    setDeletingVideoId(videoId);
 
-    if (!window.confirm("¿Estás seguro de eliminar este video?")) {
-      return;
-    }
     try {
       const { data: videoData, error: fetchError } = await supabase
         .from("videos")
@@ -222,6 +242,8 @@ const ProfilePage = () => {
             : "No se pudo eliminar el video",
         variant: "destructive",
       });
+    } finally {
+      setDeletingVideoId(null);
     }
   };
 
@@ -292,53 +314,85 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
-                <Link
-                  key={video.id}
-                  href={`/video/${video.id}`}
-                  className="group cursor-pointer"
-                >
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow mb-3">
-                    <Image
-                      src={video.thumbnail}
-                      alt={video.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                <div key={video.id} className="group">
+                  <Link href={`/video/${video.id}`} className="cursor-pointer">
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow mb-3">
+                      <Image
+                        src={video.thumbnail}
+                        alt={video.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
 
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center transition-all">
-                        <Play className="w-6 h-6 text-transparent group-hover:text-gray-900 transition-all fill-current" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-start">
-                    <div className="flex-col">
-                      <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-primary transition-colors mb-2">
-                        {video.title}
-                      </h3>
-                      <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Eye size={14} />
-                          {video.views} vistas
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {video.createdAt}
-                        </span>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center transition-all">
+                          <Play className="w-6 h-6 text-transparent group-hover:text-gray-900 transition-all fill-current" />
+                        </div>
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => handleDelete(video.id, e)}
-                      className="p-2 hover:text-red-500 rounded-full transition-colors group cursor-pointer"
-                      title="Eliminar video"
-                    >
-                      <Trash2 className="h-4 w-4 text-gray-400" />
-                    </button>
-                  </div>
-                </Link>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-col">
+                        <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                          {video.title}
+                        </h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Eye size={14} />
+                            {video.views} vistas
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={14} />
+                            {video.createdAt}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        type="button"
+                        className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm hover:shadow-md transition-all z-10"
+                        title="Eliminar video"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogTitle>
+                        ¿Estás seguro de eliminar este video?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. El video `
+                        {video.title}` será eliminado permanentemente de tu
+                        perfil.
+                      </AlertDialogDescription>
+                      <div className="flex justify-end gap-3 mt-6">
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(video.id)}
+                          disabled={deletingVideoId === video.id}
+                          className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                        >
+                          {deletingVideoId === video.id ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Eliminando...
+                            </>
+                          ) : (
+                            "Eliminar"
+                          )}
+                        </AlertDialogAction>
+                      </div>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               ))}
             </div>
           )}
