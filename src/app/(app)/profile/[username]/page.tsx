@@ -268,7 +268,7 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12 pb-8 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12 pb-8 border-b border-gray-300 dark:border-gray-700">
           <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-md shrink-0">
             {profile?.avatar_url ? (
               <Image

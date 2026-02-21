@@ -311,12 +311,12 @@ export default function LoginPage() {
                     setLoginErrors({ ...loginErrors, email: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors dark:bg-input dark:text-foreground ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     loginErrors.email
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : isLoginEmailInvalid
                         ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 dark:border-gray-700 focus:ring-red-500 focus:border-transparent"
+                        : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {loginErrors.email && (
@@ -348,10 +348,10 @@ export default function LoginPage() {
                     setLoginErrors({ ...loginErrors, password: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors dark:bg-input dark:text-foreground ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     loginErrors.password
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 dark:border-gray-700 focus:ring-red-500 focus:border-transparent"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {loginErrors.password && (
@@ -427,7 +427,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="name"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Nombre completo
                 </label>
@@ -441,10 +441,10 @@ export default function LoginPage() {
                     setRegisterErrors({ ...registerErrors, name: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     registerErrors.name
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {registerErrors.name && (
@@ -457,7 +457,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="register-email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Correo electrónico
                 </label>
@@ -471,12 +471,12 @@ export default function LoginPage() {
                     setRegisterErrors({ ...registerErrors, email: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     registerErrors.email
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : isRegisterEmailInvalid
                         ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                        : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {registerErrors.email && (
@@ -494,7 +494,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="register-password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Contraseña
                 </label>
@@ -511,10 +511,10 @@ export default function LoginPage() {
                     setRegisterErrors({ ...registerErrors, password: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     registerErrors.password
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {registerErrors.password && (
@@ -527,7 +527,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="confirm-password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Confirmar contraseña
                 </label>
@@ -547,10 +547,10 @@ export default function LoginPage() {
                     });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors bg-white dark:bg-input text-gray-900 dark:text-foreground ${
                     registerErrors.confirmPassword
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : "border-gray-300 dark:border-gray-600 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {registerErrors.confirmPassword && (
@@ -578,10 +578,10 @@ export default function LoginPage() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
+                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
+                <span className="px-2 bg-white dark:bg-card text-gray-600 dark:text-gray-400">
                   O continúa con
                 </span>
               </div>
@@ -590,7 +590,7 @@ export default function LoginPage() {
             <button
               onClick={handleGoogleSignIn}
               disabled={isLoading}
-              className="cursor-pointer w-full py-3 px-4 bg-white border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
+              className="cursor-pointer w-full py-3 px-4 bg-white dark:bg-input border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path

@@ -220,9 +220,9 @@ export const UploadModal = () => {
             <label className="block text-sm font-medium mb-2">
               Video <span className="text-red-500">*</span>
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-red-500 transition-colors">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-red-500 transition-colors">
               <Upload className="h-8 w-8 text-gray-400 mb-2" />
-              <span className="text-sm text-gray-600 dark:text-gray-300 text-center px-4">
+              <span className="text-sm text-gray-700 dark:text-gray-300 text-center px-4">
                 {videoFile ? (
                   <span className="text-green-600 font-medium">
                     {videoFile.name}
@@ -273,7 +273,7 @@ export const UploadModal = () => {
             <label className="block text-sm font-medium mb-2">
               Miniatura <span className="text-red-500">*</span>
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:border-red-500 transition-colors overflow-hidden">
+            <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:border-red-500 transition-colors overflow-hidden">
               {thumbnailPreview ? (
                 <div className="relative w-full h-full group">
                   <Image
@@ -292,7 +292,7 @@ export const UploadModal = () => {
               ) : (
                 <>
                   <ImageIcon className="h-8 w-8 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
                     Haz clic para seleccionar imagen
                   </span>
                   <span className="text-xs text-gray-400 mt-1">

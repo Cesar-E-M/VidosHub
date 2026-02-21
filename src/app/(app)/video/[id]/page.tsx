@@ -518,7 +518,7 @@ export default function VideoPage() {
               </h1>
             </div>
 
-            <div className="bg-white dark:bg-card rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-card rounded-lg p-4 border border-gray-300 dark:border-gray-700">
               <div className="flex flex-col items-center mb-4 sm:flex-row sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
@@ -554,8 +554,8 @@ export default function VideoPage() {
                 </div>
               </div>
 
-              <div className="border-t pt-4 dark:border-gray-700">
-                <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+              <div className="border-t pt-4 border-gray-300 dark:border-gray-700">
+                <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                   <div className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
                     {viewsCount} vistas
@@ -565,13 +565,13 @@ export default function VideoPage() {
                     {formatDate(video.created_at)}
                   </div>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                <p className="text-gray-800 dark:text-gray-300 whitespace-pre-wrap">
                   {video.description || "Sin descripción"}
                 </p>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-card rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-card rounded-lg p-4 border border-gray-300 dark:border-gray-700">
               <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
                 Comentarios ({comments.length})
               </h2>
@@ -589,7 +589,7 @@ export default function VideoPage() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Añade un comentario..."
-                        className="w-full border border-gray-300 dark:border-gray-700 dark:bg-input dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-input text-gray-900 dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
                         rows={3}
                         disabled={
                           isSubmittingComment ||
@@ -656,7 +656,7 @@ export default function VideoPage() {
                           {comment.profiles.full_name?.charAt(0) || "U"}
                         </div>
                         <div className="flex-1">
-                          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-3">
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
                             <div className="flex items-center justify-between mb-1">
                               <div className="flex items-center gap-2">
                                 <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
@@ -684,7 +684,7 @@ export default function VideoPage() {
                                   onChange={(e) =>
                                     setEditingContent(e.target.value)
                                   }
-                                  className="w-full border border-gray-300 dark:border-gray-700 dark:bg-input dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-input text-gray-900 dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                                   rows={4}
                                   disabled={isUpdatingComment}
                                 />
@@ -721,7 +721,7 @@ export default function VideoPage() {
                               </div>
                             ) : (
                               <>
-                                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">
+                                <p className="text-gray-800 dark:text-gray-300 text-sm whitespace-pre-wrap">
                                   {displayContent}
                                 </p>
                                 {isTooLong && (
@@ -744,7 +744,7 @@ export default function VideoPage() {
             </div>
           </div>
 
-          <div className="lg:col-span-1 border border-gray-200 dark:border-gray-700 rounded-md h-fit">
+          <div className="lg:col-span-1 border border-gray-300 dark:border-gray-700 rounded-md h-fit">
             <div className="bg-white dark:bg-card rounded-lg p-4">
               <h3 className="font-bold text-lg mb-4 text-gray-900 dark:text-gray-100">
                 Videos relacionados

@@ -127,14 +127,14 @@ export const Header = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar videos..."
-                className="w-full rounded-md bg-transparent border border-gray-200 dark:border-gray-700 dark:bg-input py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                className="w-full rounded-md bg-white dark:bg-input text-gray-900 dark:text-foreground border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
               />
               {query && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  className="absolute right-2 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                 >
-                  <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                 </button>
               )}
             </div>
@@ -253,7 +253,7 @@ export const Header = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Buscar videos..."
-                  className="w-full rounded-md bg-transparent border border-gray-200 dark:border-gray-700 dark:bg-input py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                  className="w-full rounded-md bg-white dark:bg-input border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-10 text-gray-900 dark:text-foreground text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                   autoFocus
                 />
                 {query && (

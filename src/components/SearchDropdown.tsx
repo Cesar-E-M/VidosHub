@@ -25,7 +25,7 @@ export const SearchDropdown = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-card rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-card rounded-lg shadow-lg border border-gray-300 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
       {isLoading ? (
         <div className="flex items-center justify-center p-4">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -50,10 +50,10 @@ export const SearchDropdown = ({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate text-foreground">
+                  <p className="font-medium text-sm truncate text-gray-900 dark:text-foreground">
                     {video.title}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                     {video.description}
                   </p>
                 </div>
@@ -62,7 +62,7 @@ export const SearchDropdown = ({
           ))}
         </ul>
       ) : (
-        <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+        <div className="p-4 text-center text-gray-600 dark:text-gray-400 text-sm">
           No se encontraron videos
         </div>
       )}
