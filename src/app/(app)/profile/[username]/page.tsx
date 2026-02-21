@@ -144,10 +144,10 @@ const ProfilePage = () => {
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-gray-500">Cargando perfil...</p>
+          <p className="text-gray-500 dark:text-gray-400">Cargando perfil...</p>
         </div>
       </div>
     );
@@ -249,9 +249,9 @@ const ProfilePage = () => {
 
   if (!perfile) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-900 text-lg font-semibold mb-2">
+          <p className="text-gray-900 dark:text-gray-100 text-lg font-semibold mb-2">
             No se pudo cargar el perfil
           </p>
           <button
@@ -266,10 +266,10 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-background">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12 pb-8 border-b border-gray-200">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 shadow-md shrink-0">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-12 pb-8 border-b border-gray-200 dark:border-gray-700">
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-md shrink-0">
             {profile?.avatar_url ? (
               <Image
                 src={profile.avatar_url}
@@ -284,20 +284,21 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               {perfile.displayName}
             </h1>
 
             <div className="space-y-2">
-              <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
+              <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <User size={16} />
                 <span>@{perfile.username}</span>
               </p>
 
-              <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
+              <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <Mail size={16} />
                 <Link
                   href={`mailto:${perfile.email}?subject=Hola desde VidoHub`}
+                  className="hover:text-primary"
                 >
                   {perfile.email}
                 </Link>
@@ -307,20 +308,22 @@ const ProfilePage = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
             Historial de Videos ({videos.length})
           </h2>
 
           {videos.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No has subido videos aún</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                No has subido videos aún
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
                 <div key={video.id} className="group relative">
                   <Link href={`/video/${video.id}`} className="cursor-pointer">
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow-md transition-shadow mb-3">
+                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow mb-3">
                       <Image
                         src={video.thumbnail}
                         alt={video.title}
@@ -337,10 +340,10 @@ const ProfilePage = () => {
 
                     <div className="flex justify-between items-start">
                       <div className="flex-col">
-                        <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
                           {video.title}
                         </h3>
-                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                        <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <Eye size={14} />
                             {video.views} vistas
@@ -358,7 +361,7 @@ const ProfilePage = () => {
                     <AlertDialogTrigger asChild>
                       <button
                         type="button"
-                        className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white rounded-full shadow-sm hover:shadow-md transition-all z-10"
+                        className="absolute top-2 right-2 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-all z-10"
                         title="Eliminar video"
                         onClick={(e) => {
                           e.preventDefault();
