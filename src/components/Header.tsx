@@ -104,9 +104,9 @@ export const Header = () => {
             className="flex gap-2 items-center hover:opacity-80 transition-opacity"
           >
             <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-linear-to-r from-[#ef4343] to-[#ff5724]">
-              <Video size={20} strokeWidth={2} className="text-white"></Video>
+              <Image src="/Vexo.png" width={40} height={40} alt="Logo" />
             </div>
-            <h1 className="text-xl font-bold">VideoHub</h1>
+            <h1 className="text-xl font-bold">Vexo</h1>
           </Link>
           <div
             ref={searchRef}
