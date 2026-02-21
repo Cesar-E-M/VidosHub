@@ -5,7 +5,20 @@ import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/hooks/context/useAuth";
 import { VideoPlayer } from "@/components/VideoPlayer/VideoPlayer";
-import { Heart, Share2, Eye, Calendar, Loader2, ArrowLeft } from "lucide-react";
+import {
+  Play,
+  Heart,
+  Share2,
+  Eye,
+  Clock,
+  Loader2,
+  Send,
+  Edit2,
+  X,
+  Check,
+  ArrowLeft,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@radix-ui/themes";
 import { useToast } from "@/hooks/useToast";
 import Link from "next/link";
@@ -52,6 +65,140 @@ export default function VideoPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [viewsCount, setViewsCount] = useState(0);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(
+    new Set(),
+  );
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
+  const [isUpdatingComment, setIsUpdatingComment] = useState(false);
+
+  const toggleComment = (commentId: string) => {
+    const newExpanded = new Set(expandedComments);
+    if (newExpanded.has(commentId)) {
+      newExpanded.delete(commentId);
+    } else {
+      newExpanded.add(commentId);
+    }
+    setExpandedComments(newExpanded);
+  };
+
+  const startEditComment = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setEditingContent(comment.content);
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingContent("");
+  };
+
+  const updateComment = async (commentId: string) => {
+    if (!editingContent.trim() || !user) return;
+
+    setIsUpdatingComment(true);
+
+    try {
+      const { error } = await supabase
+        .from("comments")
+        .update({ content: editingContent.trim() })
+        .eq("id", commentId)
+        .eq("user_id", user.id); // Verificar que sea el dueño
+
+      if (error) throw error;
+
+      // Actualizar estado local
+      setComments(
+        comments.map((c) =>
+          c.id === commentId ? { ...c, content: editingContent.trim() } : c,
+        ),
+      );
+
+      toast({
+        title: "Comentario actualizado",
+        description: "Tu comentario ha sido actualizado correctamente",
+      });
+
+      setEditingCommentId(null);
+      setEditingContent("");
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el comentario",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingComment(false);
+    }
+  };
+
+  const submitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim() || !user) {
+      toast({
+        title: "Error",
+        description: "Por favor escribe un comentario",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // ✅ Verificar si el usuario ya tiene un comentario
+    const userHasCommented = comments.some((c) => c.user_id === user.id);
+
+    if (userHasCommented) {
+      toast({
+        title: "Ya comentaste",
+        description:
+          "Solo puedes hacer un comentario por video. Puedes editar tu comentario existente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmittingComment(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("comments")
+        .insert([
+          {
+            video_id: videoId,
+            user_id: user.id,
+            content: newComment.trim(),
+          },
+        ])
+        .select(
+          `
+          *,
+          profiles (
+            full_name,
+            avatar_url
+          )
+        `,
+        )
+        .single();
+
+      if (error) throw error;
+
+      setComments([data, ...comments]);
+      setNewComment("");
+
+      toast({
+        title: "Comentario publicado",
+        description: "Tu comentario ha sido publicado correctamente",
+      });
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo publicar el comentario",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingComment(false);
+    }
+  };
 
   useEffect(() => {
     if (!videoId) return;
@@ -428,55 +575,57 @@ export default function VideoPage() {
               </h2>
 
               {user && (
-                <form onSubmit={handleSubmitComment} className="mb-6">
+                <form onSubmit={submitComment} className="mb-6">
                   <div className="flex gap-3">
                     <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold shrink-0">
-                      {user.user_metadata?.full_name?.charAt(0) || "U"}
+                      {user.user_metadata?.name?.charAt(0) ||
+                        user.email?.charAt(0) ||
+                        "U"}
                     </div>
                     <div className="flex-1">
                       <textarea
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Agrega un comentario..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                        placeholder="Añade un comentario..."
+                        className="w-full border border-gray-300 rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
                         rows={3}
-                        disabled={isSubmittingComment}
+                        disabled={
+                          isSubmittingComment ||
+                          comments.some((c) => c.user_id === user.id)
+                        }
                       />
-                      <div className="flex justify-end gap-2 mt-2">
-                        <Button
-                          type="button"
-                          variant="soft"
-                          color="gray"
-                          onClick={() => setNewComment("")}
-                          disabled={isSubmittingComment}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
+                      {comments.some((c) => c.user_id === user.id) && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          Ya has comentado en este video. Puedes editar tu
+                          comentario existente.
+                        </p>
+                      )}
+                      <div className="flex justify-end mt-2">
+                        <button
                           type="submit"
-                          disabled={!newComment.trim() || isSubmittingComment}
-                          className="bg-linear-to-r from-red-500 to-orange-500 text-white"
+                          disabled={
+                            isSubmittingComment ||
+                            !newComment.trim() ||
+                            comments.some((c) => c.user_id === user.id)
+                          }
+                          className="bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                          {isSubmittingComment ? "Publicando..." : "Comentar"}
-                        </Button>
+                          {isSubmittingComment ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Publicando...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              Comentar
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
                 </form>
-              )}
-
-              {!user && (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg text-center">
-                  <p className="text-gray-600">
-                    <Link
-                      href="/login"
-                      className="text-red-500 hover:underline"
-                    >
-                      Inicia sesión
-                    </Link>{" "}
-                    para comentar
-                  </p>
-                </div>
               )}
 
               <div className="space-y-4">
@@ -485,28 +634,109 @@ export default function VideoPage() {
                     No hay comentarios aún. ¡Sé el primero en comentar!
                   </p>
                 ) : (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-3">
-                      <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold shrink-0">
-                        {comment.profiles.full_name?.charAt(0) || "U"}
-                      </div>
-                      <div className="flex-1">
-                        <div className="bg-gray-100 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-sm">
-                              {comment.profiles.full_name || "Usuario"}
-                            </p>
-                            <span className="text-xs text-gray-500">
-                              {formatDate(comment.created_at)}
-                            </span>
+                  comments.map((comment) => {
+                    const isExpanded = expandedComments.has(comment.id);
+                    const isEditing = editingCommentId === comment.id;
+                    const isOwner = user?.id === comment.user_id;
+                    const lines = comment.content.split("\n");
+                    const isTooLong =
+                      lines.length > 4 || comment.content.length > 200;
+
+                    const displayContent =
+                      !isExpanded && isTooLong && !isEditing
+                        ? lines.slice(0, 4).join("\n") +
+                          (lines.length > 4 ? "..." : "")
+                        : comment.content;
+
+                    return (
+                      <div key={comment.id} className="flex gap-3">
+                        <div className="h-10 w-10 rounded-full bg-linear-to-r from-red-500 to-orange-500 flex items-center justify-center text-white font-bold shrink-0">
+                          {comment.profiles.full_name?.charAt(0) || "U"}
+                        </div>
+                        <div className="flex-1">
+                          <div className="bg-gray-100 rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <p className="font-semibold text-sm">
+                                  {comment.profiles.full_name || "Usuario"}
+                                </p>
+                                <span className="text-xs text-gray-500">
+                                  {formatDate(comment.created_at)}
+                                </span>
+                              </div>
+                              {isOwner && !isEditing && (
+                                <button
+                                  onClick={() => startEditComment(comment)}
+                                  className="text-gray-500 hover:text-blue-600 p-1"
+                                  title="Editar comentario"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+
+                            {isEditing ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editingContent}
+                                  onChange={(e) =>
+                                    setEditingContent(e.target.value)
+                                  }
+                                  className="w-full border border-gray-300 rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                  rows={4}
+                                  disabled={isUpdatingComment}
+                                />
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    onClick={cancelEditComment}
+                                    disabled={isUpdatingComment}
+                                    className="text-gray-600 hover:text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center gap-1 disabled:opacity-50"
+                                  >
+                                    <X className="w-4 h-4" />
+                                    Cancelar
+                                  </button>
+                                  <button
+                                    onClick={() => updateComment(comment.id)}
+                                    disabled={
+                                      isUpdatingComment ||
+                                      !editingContent.trim()
+                                    }
+                                    className="bg-blue-500 text-white px-3 py-1 rounded text-sm font-medium hover:bg-blue-600 disabled:opacity-50 flex items-center gap-1"
+                                  >
+                                    {isUpdatingComment ? (
+                                      <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Guardando...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Check className="w-4 h-4" />
+                                        Guardar
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-gray-700 text-sm whitespace-pre-wrap">
+                                  {displayContent}
+                                </p>
+                                {isTooLong && (
+                                  <button
+                                    onClick={() => toggleComment(comment.id)}
+                                    className="text-blue-600 hover:text-blue-700 text-sm font-medium mt-2"
+                                  >
+                                    {isExpanded ? "Mostrar menos" : "Leer más"}
+                                  </button>
+                                )}
+                              </>
+                            )}
                           </div>
-                          <p className="text-gray-700 text-sm">
-                            {comment.content}
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
             </div>

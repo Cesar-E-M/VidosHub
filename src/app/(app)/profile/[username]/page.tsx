@@ -296,7 +296,7 @@ const ProfilePage = () => {
 
               <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
                 <Mail size={16} />
-                <span>{perfile.email}</span>
+                <Link href={`mailto:${perfile.email}`}>{perfile.email}</Link>
               </p>
             </div>
           </div>
