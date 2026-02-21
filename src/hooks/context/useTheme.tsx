@@ -55,11 +55,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  // Evitar flash de contenido sin estilo
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
