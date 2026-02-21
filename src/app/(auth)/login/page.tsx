@@ -265,17 +265,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white dark:bg-card p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
         <div className="text-center">
           <h2 className="text-3xl font-bold">Bienvenido a VideoHub</h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Inicia sesión o crea tu cuenta
           </p>
         </div>
 
         <Tabs.Root defaultValue="login">
-          <Tabs.List className="flex gap-2 border-b border-gray-200 mb-6">
+          <Tabs.List className="flex gap-2 border-b border-gray-200 dark:border-gray-700 mb-6">
             <Tabs.Trigger
               value="login"
               className="flex-1 pb-3 px-4 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-red-500 data-[state=active]:text-red-600 hover:text-red-500 transition-colors"
@@ -297,7 +297,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Correo electrónico
                 </label>
@@ -311,12 +311,12 @@ export default function LoginPage() {
                     setLoginErrors({ ...loginErrors, email: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors dark:bg-input dark:text-foreground ${
                     loginErrors.email
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
                       : isLoginEmailInvalid
                         ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                        : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                        : "border-gray-300 dark:border-gray-700 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {loginErrors.email && (
@@ -334,7 +334,7 @@ export default function LoginPage() {
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                 >
                   Contraseña
                 </label>
@@ -348,10 +348,10 @@ export default function LoginPage() {
                     setLoginErrors({ ...loginErrors, password: false });
                   }}
                   disabled={isLoading}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 disabled:opacity-50 transition-colors dark:bg-input dark:text-foreground ${
                     loginErrors.password
                       ? "border-red-500 focus:ring-red-500 focus:border-red-500"
-                      : "border-gray-300 focus:ring-red-500 focus:border-transparent"
+                      : "border-gray-300 dark:border-gray-700 focus:ring-red-500 focus:border-transparent"
                   }`}
                 />
                 {loginErrors.password && (
@@ -414,7 +414,7 @@ export default function LoginPage() {
               Continuar con Google
             </button>
 
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
               ¿Olvidaste tu contraseña?{" "}
               <a href="#" className="text-red-500 hover:text-red-600">
                 Recupérala aquí

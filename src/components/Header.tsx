@@ -1,8 +1,9 @@
 "use client";
-import { Video, Upload, LogOut, Search, X, User } from "lucide-react";
+import { Upload, LogOut, Search, X, User, Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useUploadModal } from "@/hooks/useUploadModal";
 import { useAuth } from "@/hooks/context/useAuth";
+import { useTheme } from "@/hooks/context/useTheme";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/useToast";
 import { useVideoSearch } from "@/hooks/useVideoSearch";
@@ -12,6 +13,7 @@ import Image from "next/image";
 
 export const Header = () => {
   const { user, profile, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { onOpen } = useUploadModal();
   const router = useRouter();
   const { toast } = useToast();
@@ -72,7 +74,7 @@ export const Header = () => {
         description: "Hasta pronto!",
       });
       router.push("/");
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "No se pudo cerrar sesión",
@@ -97,7 +99,7 @@ export const Header = () => {
   }, []);
   return (
     <>
-      <section className="px-8 sticky top-0 z-50 w-full border-b border-gray-300 bg-white shadow-sm">
+      <section className="px-8 sticky top-0 z-50 w-full border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-card shadow-sm">
         <div className=" flex h-16 items-center justify-between mx-auto">
           <Link
             href="/"
@@ -119,20 +121,20 @@ export const Header = () => {
             className="mx-4 hidden max-w-lg grow px-2 sm:flex relative"
           >
             <div className="bg-secondary relative flex grow items-center rounded-lg">
-              <Search className="absolute left-0 size-8 p-2 text-gray-500" />
+              <Search className="absolute left-0 size-8 p-2 text-gray-500 dark:text-gray-400" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar videos..."
-                className="w-full rounded-md bg-transparent border border-gray-200 py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                className="w-full rounded-md bg-transparent border border-gray-200 dark:border-gray-700 dark:bg-input py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
               />
               {query && (
                 <button
                   onClick={clearSearch}
-                  className="absolute right-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
+                  className="absolute right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
                 >
-                  <X className="h-4 w-4 text-gray-500" />
+                  <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </button>
               )}
             </div>
@@ -149,9 +151,22 @@ export const Header = () => {
             <button
               ref={searchButtonRef}
               onClick={() => setShowMobileSearch(!showMobileSearch)}
-              className="sm:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="sm:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
-              <Search className="h-5 w-5 text-gray-700" />
+              <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+            </button>
+
+            {/* Botón de cambio de tema */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              aria-label="Cambiar tema"
+            >
+              {theme === "light" ? (
+                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              ) : (
+                <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              )}
             </button>
 
             {!user && (
@@ -193,30 +208,30 @@ export const Header = () => {
                   </button>
 
                   {isAbierto && (
-                    <div className="absolute right-0 top-full mt-3 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-100">
+                    <div className="absolute right-0 top-full mt-3 w-48 bg-white dark:bg-card rounded-md shadow-lg py-1 z-10 border border-gray-100 dark:border-gray-700">
                       <Link
                         href="/profile/me"
-                        className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                         onClick={() => setIsAbierto(false)}
                       >
                         <User className="inline-block mr-2 h-4 w-4" />
                         Mi Perfil
                       </Link>
 
-                      <hr className="my-1 border-gray-100" />
+                      <hr className="my-1 border-gray-100 dark:border-gray-700" />
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm text-black hover:bg-gray-100 cursor-pointer sm:hidden"
+                        className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer sm:hidden"
                         onClick={onOpen}
                       >
                         <Upload className="inline-block mr-2 h-4 w-4" />
                         Subir Video
                       </button>
 
-                      <hr className="my-1 border-gray-100 sm:hidden" />
+                      <hr className="my-1 border-gray-100 dark:border-gray-700 sm:hidden" />
 
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 cursor-pointer"
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                       >
                         <LogOut className="inline-block mr-2 h-4 w-4" />
                         Cerrar Sesión
@@ -238,15 +253,15 @@ export const Header = () => {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Buscar videos..."
-                  className="w-full rounded-md bg-transparent border border-gray-200 py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                  className="w-full rounded-md bg-transparent border border-gray-200 dark:border-gray-700 dark:bg-input py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                   autoFocus
                 />
                 {query && (
                   <button
                     onClick={clearSearch}
-                    className="absolute right-2 p-1 hover:bg-gray-200 rounded-full transition-colors"
+                    className="absolute right-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
                   >
-                    <X className="h-4 w-4 text-gray-500" />
+                    <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </button>
                 )}
               </div>

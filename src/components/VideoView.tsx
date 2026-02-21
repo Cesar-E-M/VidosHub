@@ -22,7 +22,7 @@ export const VideoView = () => {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <p className="text-red-500 mb-2">Error al cargar videos</p>
-          <p className="text-sm text-gray-500">{error}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{error}</p>
           <button
             onClick={refetch}
             className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
@@ -38,8 +38,10 @@ export const VideoView = () => {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <p className="text-gray-500 mb-2">No hay videos disponibles</p>
-          <p className="text-sm text-gray-400">
+          <p className="text-gray-500 dark:text-gray-400 mb-2">
+            No hay videos disponibles
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
             ¡Sé el primero en subir un video!
           </p>
         </div>

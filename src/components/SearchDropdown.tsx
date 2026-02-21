@@ -25,7 +25,7 @@ export const SearchDropdown = ({
   if (!isOpen) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 overflow-y-auto z-50">
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-card rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
       {isLoading ? (
         <div className="flex items-center justify-center p-4">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
@@ -37,9 +37,9 @@ export const SearchDropdown = ({
               <Link
                 href={`/video/${video.id}`}
                 onClick={onClose}
-                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 transition-colors"
+                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
-                <div className="relative w-24 h-14 rounded overflow-hidden bg-gray-200">
+                <div className="relative w-24 h-14 rounded overflow-hidden bg-gray-200 dark:bg-gray-700">
                   {video.thumbnail_url && (
                     <Image
                       src={video.thumbnail_url}
@@ -50,8 +50,10 @@ export const SearchDropdown = ({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{video.title}</p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="font-medium text-sm truncate text-foreground">
+                    {video.title}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {video.description}
                   </p>
                 </div>
@@ -60,7 +62,7 @@ export const SearchDropdown = ({
           ))}
         </ul>
       ) : (
-        <div className="p-4 text-center text-gray-500 text-sm">
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
           No se encontraron videos
         </div>
       )}

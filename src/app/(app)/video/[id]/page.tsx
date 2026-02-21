@@ -99,7 +99,7 @@ export default function VideoPage() {
 
     try {
       const { error } = await supabase
-        .from("comments")
+        .from("video_comments")
         .update({ content: editingContent.trim() })
         .eq("id", commentId)
         .eq("user_id", user.id); // Verificar que sea el dueño
@@ -160,7 +160,7 @@ export default function VideoPage() {
 
     try {
       const { data, error } = await supabase
-        .from("comments")
+        .from("video_comments")
         .insert([
           {
             video_id: videoId,

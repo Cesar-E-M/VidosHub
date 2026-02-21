@@ -4,6 +4,7 @@ import { Theme } from "@radix-ui/themes";
 import { Toaster } from "sonner";
 import { UploadModal } from "@/components/UploadModal";
 import { AuthProvider } from "@/hooks/context/useAuth";
+import { ThemeProvider } from "@/hooks/context/useTheme";
 
 export default function RootLayout({
   children,
@@ -15,31 +16,46 @@ export default function RootLayout({
       <head>
         <meta content="text/html;charset=UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') || 
+                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                if (theme === 'dark') {
+                  document.documentElement.classList.add('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
       </head>
       <body>
-        <Theme>
-          <AuthProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              richColors
-              theme="dark" // o "dark"
-              toastOptions={{
-                style: {
-                  background: "white",
-                  color: "#1f2937",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "0.75rem",
-                  fontSize: "14px",
-                  padding: "16px",
-                },
-                className: "custom-toast",
-                duration: 4000,
-              }}
-            />
-            <UploadModal />
-          </AuthProvider>
-        </Theme>
+        <ThemeProvider>
+          <Theme>
+            <AuthProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                theme="dark" // o "dark"
+                toastOptions={{
+                  style: {
+                    background: "white",
+                    color: "#1f2937",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "0.75rem",
+                    fontSize: "14px",
+                    padding: "16px",
+                  },
+                  className: "custom-toast",
+                  duration: 4000,
+                }}
+              />
+              <UploadModal />
+            </AuthProvider>
+          </Theme>
+        </ThemeProvider>
       </body>
     </html>
   );

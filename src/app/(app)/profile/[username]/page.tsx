@@ -296,7 +296,11 @@ const ProfilePage = () => {
 
               <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600">
                 <Mail size={16} />
-                <Link href={`mailto:${perfile.email}`}>{perfile.email}</Link>
+                <Link
+                  href={`mailto:${perfile.email}?subject=Hola desde VidoHub`}
+                >
+                  {perfile.email}
+                </Link>
               </p>
             </div>
           </div>

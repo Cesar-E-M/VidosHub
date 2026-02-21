@@ -112,8 +112,8 @@ export const VideoCard = ({
 
   return (
     <Link href={`/video/${id}`} className="group">
-      <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full">
-        <div className="relative aspect-video bg-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 h-full border border-gray-200 dark:border-gray-700">
+        <div className="relative aspect-video bg-gray-200 dark:bg-gray-800 overflow-hidden">
           {thumbnail_url ? (
             <Image
               src={thumbnail_url}
@@ -124,8 +124,10 @@ export const VideoCard = ({
               loading="eager"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-300">
-              <span className="text-gray-500 text-sm">Sin miniatura</span>
+            <div className="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-700">
+              <span className="text-gray-500 dark:text-gray-400 text-sm">
+                Sin miniatura
+              </span>
             </div>
           )}
 
@@ -141,12 +143,12 @@ export const VideoCard = ({
             {title}
           </h3>
 
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
             {description}
           </p>
 
           {username && (
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
               Por: <span className="font-medium">{username}</span>
             </p>
           )}
@@ -160,7 +162,7 @@ export const VideoCard = ({
                 type="button"
                 onClick={handleLike}
                 disabled={isLoading}
-                className="flex items-center gap-1 text-sm hover:text-red-500 transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300 hover:text-red-500 transition-colors cursor-pointer"
               >
                 <Heart
                   className={`h-5 w-5 ${
@@ -170,7 +172,7 @@ export const VideoCard = ({
                 <span>{likes}</span>
               </button>
 
-              <div className="flex items-center gap-1 text-sm text-gray-600">
+              <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-400">
                 <MessageCircle className="h-5 w-5" />
                 <span>{commentsCount}</span>
               </div>
