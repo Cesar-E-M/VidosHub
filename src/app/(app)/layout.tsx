@@ -9,9 +9,9 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "VideoHub",
+  title: "VEXO",
   description:
-    "VideoHub es una plataforma de publicación de videos donde los usuarios pueden compartir sus creaciones, descubrir contenido nuevo y conectarse con otros amantes del video. Con una amplia variedad de categorías y una comunidad activa, VideoHub es el lugar perfecto para explorar y disfrutar de videos de alta calidad.",
+    "Vexo es una plataforma de publicación de videos donde los usuarios pueden compartir sus creaciones, descubrir contenido nuevo y conectarse con otros amantes del video. Con una amplia variedad de categorías y una comunidad activa, VideoHub es el lugar perfecto para explorar y disfrutar de videos de alta calidad.",
 };
 
 export default function RootLayout({

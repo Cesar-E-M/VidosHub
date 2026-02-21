@@ -104,7 +104,13 @@ export const Header = () => {
             className="flex gap-2 items-center hover:opacity-80 transition-opacity"
           >
             <div className="flex items-center justify-center h-10 w-10 rounded-xl">
-              <Image src="/Vexo.jpg" width={500} height={500} alt="Logo" />
+              <Image
+                src="/Vexo.jpg"
+                width={500}
+                height={500}
+                alt="Logo"
+                className="rounded-2xl"
+              />
             </div>
             <h1 className="text-xl font-bold">Vexo</h1>
           </Link>
