@@ -47,18 +47,128 @@ const ProfilePage = () => {
   const [deletingVideoId, setDeletingVideoId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if (days === 0) return "Hoy";
+    if (days === 1) return "Ayer";
+    if (days < 7) return `Hace ${days} días`;
+    if (days < 30) return `Hace ${Math.floor(days / 7)} semanas`;
+    if (days < 365) return `Hace ${Math.floor(days / 30)} meses`;
+    return `Hace ${Math.floor(days / 365)} años`;
+  };
+
+  const handleUpdateVideo = (
+    videoId: string,
+    updatedData: { title: string; description?: string; category?: string },
+  ) => {
+    setVideos((prev) =>
+      prev.map((video) =>
+        video.id === videoId ? { ...video, ...updatedData } : video,
+      ),
+    );
+  };
+
+  const handleDelete = async (videoId: string) => {
+    console.log("🔴 handleDelete llamado con:", videoId);
+    setDeletingVideoId(videoId);
+
+    try {
+      const { data: videoData, error: fetchError } = await supabase
+        .from("videos")
+        .select("video_url, thumbnail_url")
+        .eq("id", videoId)
+        .single();
+
+      if (fetchError) {
+        console.error("❌ Error al obtener video:", fetchError);
+        throw new Error("No se pudo obtener la información del video");
+      }
+
+      const storageErrors: string[] = [];
+
+      if (videoData?.video_url) {
+        const urlParts = videoData.video_url.split("/videos/");
+        const videoPath = urlParts[1];
+        if (videoPath) {
+          const { error: videoStorageError } = await supabase.storage
+            .from("videos")
+            .remove([videoPath]);
+          if (videoStorageError) {
+            storageErrors.push(`Video: ${videoStorageError.message}`);
+          }
+        }
+      }
+
+      if (videoData?.thumbnail_url) {
+        const urlParts = videoData.thumbnail_url.split("/thumbnails/");
+        const thumbnailPath = urlParts[1];
+        if (thumbnailPath) {
+          const { error: thumbnailStorageError } = await supabase.storage
+            .from("thumbnails")
+            .remove([thumbnailPath]);
+          if (thumbnailStorageError) {
+            storageErrors.push(`Thumbnail: ${thumbnailStorageError.message}`);
+          }
+        }
+      }
+
+      const { error: deleteError } = await supabase
+        .from("videos")
+        .delete()
+        .eq("id", videoId)
+        .eq("user_id", user?.id);
+
+      if (deleteError) {
+        console.error("❌ Error al eliminar de BD:", deleteError);
+        throw deleteError;
+      }
+
+      if (storageErrors.length > 0) {
+        toast({
+          title: "Video eliminado parcialmente",
+          description: `Errores con archivos: ${storageErrors.join(", ")}`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "✅ Video eliminado",
+          description: "El video fue eliminado correctamente.",
+        });
+      }
+
+      setVideos((prev) => prev.filter((v) => v.id !== videoId));
+    } catch (error) {
+      console.error("💥 Error general al eliminar:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "No se pudo eliminar el video",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingVideoId(null);
+    }
+  };
+
   useEffect(() => {
     const loadProfile = async () => {
       if (authLoading) return;
-
       if (!user) {
         router.push("/login");
         return;
       }
-
       try {
         setLoading(true);
-
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("*")
@@ -75,7 +185,7 @@ const ProfilePage = () => {
 
         if (videosError) throw videosError;
 
-        const userProfile: UserProfile = {
+        setPerfile({
           id: profileData.id,
           username: profileData.username || user.email?.split("@")[0] || "user",
           displayName:
@@ -84,22 +194,14 @@ const ProfilePage = () => {
           avatar:
             profileData.avatar_url ||
             `https://ui-avatars.com/api/?name=${encodeURIComponent(profileData.full_name || user.email || "User")}&size=400&background=ef4343&color=fff`,
-        };
+        });
 
-        setPerfile(userProfile);
-
-        // ✅ Obtener el conteo de vistas desde video_views para cada video
         const formattedVideos: Video[] = await Promise.all(
           (videosData || []).map(async (video) => {
-            // Contar las vistas desde la tabla video_views
-            const { count, error: countError } = await supabase
+            const { count } = await supabase
               .from("video_views")
               .select("*", { count: "exact", head: true })
               .eq("video_id", video.id);
-
-            if (countError) {
-              console.error("Error contando vistas:", countError);
-            }
 
             return {
               id: video.id,
@@ -128,40 +230,6 @@ const ProfilePage = () => {
     loadProfile();
   }, [user, authLoading, router]);
 
-  const handleUpdateVideo = (
-    videoId: string,
-    updatedData: {
-      title: string;
-      description?: string;
-      category?: string;
-    },
-  ) => {
-    setVideos(
-      videos.map((video) =>
-        video.id === videoId ? { ...video, ...updatedData } : video,
-      ),
-    );
-  };
-
-  const formatDuration = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const formatTimeAgo = (date: Date): string => {
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) return "Hoy";
-    if (days === 1) return "Ayer";
-    if (days < 7) return `Hace ${days} días`;
-    if (days < 30) return `Hace ${Math.floor(days / 7)} semanas`;
-    if (days < 365) return `Hace ${Math.floor(days / 30)} meses`;
-    return `Hace ${Math.floor(days / 365)} años`;
-  };
-
   if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-background flex items-center justify-center">
@@ -172,100 +240,6 @@ const ProfilePage = () => {
       </div>
     );
   }
-
-  const handleDelete = async (videoId: string) => {
-    setDeletingVideoId(videoId);
-
-    try {
-      const { data: videoData, error: fetchError } = await supabase
-        .from("videos")
-        .select("video_url, thumbnail_url")
-        .eq("id", videoId)
-        .single();
-
-      if (fetchError) {
-        console.error("❌ Error al obtener video:", fetchError);
-        throw new Error("No se pudo obtener la información del video");
-      }
-
-      const storageErrors = [];
-
-      if (videoData?.video_url) {
-        const urlParts = videoData.video_url.split("/videos/");
-        const videoPath = urlParts[1];
-
-        if (videoPath) {
-          const { error: videoStorageError } = await supabase.storage
-            .from("videos")
-            .remove([videoPath]);
-
-          if (videoStorageError) {
-            console.error("❌ Error al eliminar video:", videoStorageError);
-            storageErrors.push(`Video: ${videoStorageError.message}`);
-          }
-        }
-      }
-
-      if (videoData?.thumbnail_url) {
-        const urlParts = videoData.thumbnail_url.split("/thumbnails/");
-        const thumbnailPath = urlParts[1];
-
-        if (thumbnailPath) {
-          const { error: thumbnailStorageError } = await supabase.storage
-            .from("thumbnails")
-            .remove([thumbnailPath]);
-
-          if (thumbnailStorageError) {
-            console.error(
-              "❌ Error al eliminar thumbnail:",
-              thumbnailStorageError,
-            );
-            storageErrors.push(`Thumbnail: ${thumbnailStorageError.message}`);
-          }
-        }
-      }
-
-      const { error: deleteError } = await supabase
-        .from("videos")
-        .delete()
-        .eq("id", videoId)
-        .eq("user_id", user?.id);
-
-      if (deleteError) {
-        console.error("❌ Error al eliminar de BD:", deleteError);
-        throw deleteError;
-      }
-
-      // 4. Mostrar resultado
-      if (storageErrors.length > 0) {
-        toast({
-          title: "Video eliminado parcialmente",
-          description: `El video fue eliminado pero hubo errores con archivos: ${storageErrors.join(", ")}`,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Video eliminado",
-          description: "El video fue eliminado correctamente.",
-        });
-      }
-
-      // 5. Actualizar UI
-      setVideos(videos.filter((v) => v.id !== videoId));
-    } catch (error) {
-      console.error("💥 Error general al eliminar:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error
-            ? error.message
-            : "No se pudo eliminar el video",
-        variant: "destructive",
-      });
-    } finally {
-      setDeletingVideoId(null);
-    }
-  };
 
   if (!perfile) {
     return (
@@ -294,30 +268,26 @@ const ProfilePage = () => {
               <Image
                 src={profile.avatar_url}
                 alt="Avatar"
-                className="w-full h-full object-cover"
-                width={500}
-                height={500}
+                fill
+                className="object-cover"
               />
             ) : (
               <User className="h-5 w-5 text-gray-600" />
             )}
           </div>
-
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground dark:text-gray-100 mb-2">
               {perfile.displayName}
             </h1>
-
             <div className="space-y-2">
               <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <User size={16} />
                 <span>@{perfile.username}</span>
               </p>
-
               <p className="flex items-center justify-center sm:justify-start gap-2 text-gray-600 dark:text-gray-400">
                 <Mail size={16} />
                 <Link
-                  href={`mailto:${perfile.email}?subject=Hola desde VidoHub`}
+                  href={`mailto:${perfile.email}`}
                   className="hover:text-primary"
                 >
                   {perfile.email}
@@ -343,10 +313,13 @@ const ProfilePage = () => {
               {videos.map((video) => (
                 <div
                   key={video.id}
-                  className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  className="group bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300"
                 >
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow mb-3">
-                    <div onClick={(e) => e.stopPropagation()}>
+                  <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    <div
+                      className="absolute top-2 left-2 z-20"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <VideoEditDialog
                         videoId={video.id}
                         currentTitle={video.title}
@@ -357,40 +330,43 @@ const ProfilePage = () => {
                         }
                       />
                     </div>
-                    <div onClick={(e) => e.stopPropagation()}>
+
+                    <div
+                      className="absolute top-2 right-2 z-20"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <button
                             type="button"
-                            className="absolute top-2 right-2 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-all z-10"
+                            className="p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-all"
                             title="Eliminar video"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
                           >
                             <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
                           </button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogTitle>
-                            ¿Estás seguro de eliminar este video?
+
+                        <AlertDialogContent className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-6">
+                          <AlertDialogTitle className="text-gray-900 dark:text-gray-100 text-lg font-semibold">
+                            ¿Eliminar este video?
                           </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción no se puede deshacer. El video `
-                            {video.title}` será eliminado permanentemente de tu
-                            perfil.
+                          <AlertDialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                            Esta acción no se puede deshacer. El video{" "}
+                            <span className="font-medium">`{video.title}`</span>{" "}
+                            será eliminado permanentemente.
                           </AlertDialogDescription>
                           <div className="flex justify-end gap-3 mt-6">
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogCancel className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
+                              Cancelar
+                            </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDelete(video.id)}
                               disabled={deletingVideoId === video.id}
-                              className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md disabled:opacity-50 flex items-center gap-2"
                             >
                               {deletingVideoId === video.id ? (
                                 <>
-                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  <Loader2 className="w-4 h-4 animate-spin" />
                                   Eliminando...
                                 </>
                               ) : (
@@ -404,12 +380,7 @@ const ProfilePage = () => {
 
                     <Link
                       href={`/video/${video.id}`}
-                      className="block cursor-pointer"
-                      onClick={(e) => {
-                        if (deletingVideoId === video.id) {
-                          e.preventDefault();
-                        }
-                      }}
+                      className="block w-full h-full"
                     >
                       <Image
                         src={video.thumbnail}
@@ -417,7 +388,6 @@ const ProfilePage = () => {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                         <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center transition-all">
                           <Play className="w-6 h-6 text-transparent group-hover:text-gray-900 transition-all fill-current" />
@@ -426,21 +396,19 @@ const ProfilePage = () => {
                     </Link>
                   </div>
 
-                  <div className="flex justify-between items-start p-4">
-                    <div className="flex-col">
-                      <h3 className="font-medium text-foreground dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
-                        {video.title}
-                      </h3>
-                      <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <Eye size={14} />
-                          {video.views} vistas
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={14} />
-                          {video.createdAt}
-                        </span>
-                      </div>
+                  <div className="p-4">
+                    <h3 className="font-medium text-foreground dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                      {video.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Eye size={14} />
+                        {video.views} vistas
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {video.createdAt}
+                      </span>
                     </div>
                   </div>
                 </div>
