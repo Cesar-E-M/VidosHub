@@ -15,7 +15,8 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@radix-ui/react-alert-dialog";
+} from "@/hooks/context/alert-dialog";
+import { VideoEditDialog } from "@/components/VideoEditDialog";
 
 interface Video {
   id: string;
@@ -25,6 +26,8 @@ interface Video {
   views: number;
   createdAt: string;
   userId: string;
+  description?: string;
+  category?: string;
 }
 
 interface UserProfile {
@@ -108,6 +111,8 @@ const ProfilePage = () => {
               views: count || 0,
               createdAt: formatTimeAgo(new Date(video.created_at)),
               userId: video.user_id,
+              description: video.description || "",
+              category: video.category || "other",
             };
           }),
         );
@@ -122,6 +127,21 @@ const ProfilePage = () => {
 
     loadProfile();
   }, [user, authLoading, router]);
+
+  const handleUpdateVideo = (
+    videoId: string,
+    updatedData: {
+      title: string;
+      description?: string;
+      category?: string;
+    },
+  ) => {
+    setVideos(
+      videos.map((video) =>
+        video.id === videoId ? { ...video, ...updatedData } : video,
+      ),
+    );
+  };
 
   const formatDuration = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -284,7 +304,7 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-gray-100 mb-2">
               {perfile.displayName}
             </h1>
 
@@ -321,9 +341,21 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {videos.map((video) => (
-                <div key={video.id} className="group relative">
+                <div
+                  key={video.id}
+                  className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+                >
                   <Link href={`/video/${video.id}`} className="cursor-pointer">
                     <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow mb-3">
+                      <VideoEditDialog
+                        videoId={video.id}
+                        currentTitle={video.title}
+                        currentDescription={video.description}
+                        currentCategory={video.category}
+                        onUpdate={(updatedData) =>
+                          handleUpdateVideo(video.id, updatedData)
+                        }
+                      />
                       <Image
                         src={video.thumbnail}
                         alt={video.title}
@@ -340,7 +372,7 @@ const ProfilePage = () => {
 
                     <div className="flex justify-between items-start">
                       <div className="flex-col">
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                        <h3 className="font-medium text-black dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
                           {video.title}
                         </h3>
                         <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">

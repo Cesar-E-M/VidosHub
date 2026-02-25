@@ -99,7 +99,7 @@ export const Header = () => {
   }, []);
   return (
     <>
-      <section className="px-8 sticky top-0 z-50 w-full border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-card shadow-sm">
+      <section className="px-8 sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-card shadow-sm">
         <div className=" flex h-16 items-center justify-between mx-auto">
           <Link
             href="/"
@@ -127,7 +127,7 @@ export const Header = () => {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar videos..."
-                className="w-full rounded-md bg-white dark:bg-input text-gray-900 dark:text-foreground border border-gray-300 dark:border-gray-600 py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                className="w-full rounded-md bg-white dark:bg-input text-gray-900 dark:text-foreground border border-gray-200 dark:border-gray-600 py-2 pl-10 pr-10 text-sm outline-none focus-visible:ring-2 focus-visible:ring-red-400"
               />
               {query && (
                 <button
@@ -151,7 +151,7 @@ export const Header = () => {
             <button
               ref={searchButtonRef}
               onClick={() => setShowMobileSearch(!showMobileSearch)}
-              className="sm:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              className="sm:hidden p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full transition-colors"
             >
               <Search className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             </button>
