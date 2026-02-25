@@ -304,7 +304,7 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black dark:text-gray-100 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground dark:text-gray-100 mb-2">
               {perfile.displayName}
             </h1>
 
@@ -345,92 +345,93 @@ const ProfilePage = () => {
                   key={video.id}
                   className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
                 >
-                  <Link href={`/video/${video.id}`} className="cursor-pointer">
-                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow mb-3">
-                      <VideoEditDialog
-                        videoId={video.id}
-                        currentTitle={video.title}
-                        currentDescription={video.description}
-                        currentCategory={video.category}
-                        onUpdate={(updatedData) =>
-                          handleUpdateVideo(video.id, updatedData)
-                        }
-                      />
-                      <Image
-                        src={video.thumbnail}
-                        alt={video.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-
+                  <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 shadow-sm group-hover:shadow-md transition-shadow mb-3">
+                    <VideoEditDialog
+                      videoId={video.id}
+                      currentTitle={video.title}
+                      currentDescription={video.description}
+                      currentCategory={video.category}
+                      onUpdate={(updatedData) =>
+                        handleUpdateVideo(video.id, updatedData)
+                      }
+                    />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          type="button"
+                          className="absolute top-2 right-2 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-all z-10"
+                          title="Eliminar video"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogTitle>
+                          ¿Estás seguro de eliminar este video?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. El video `
+                          {video.title}` será eliminado permanentemente de tu
+                          perfil.
+                        </AlertDialogDescription>
+                        <div className="flex justify-end gap-3 mt-6">
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(video.id)}
+                            disabled={deletingVideoId === video.id}
+                            className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                          >
+                            {deletingVideoId === video.id ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Eliminando...
+                              </>
+                            ) : (
+                              "Eliminar"
+                            )}
+                          </AlertDialogAction>
+                        </div>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <Image
+                      src={video.thumbnail}
+                      alt={video.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <Link
+                      href={`/video/${video.id}`}
+                      className="cursor-pointer"
+                    >
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
                         <div className="w-12 h-12 rounded-full bg-white/0 group-hover:bg-white/95 flex items-center justify-center transition-all">
                           <Play className="w-6 h-6 text-transparent group-hover:text-gray-900 transition-all fill-current" />
                         </div>
                       </div>
-                    </div>
+                    </Link>
+                  </div>
 
-                    <div className="flex justify-between items-start">
-                      <div className="flex-col">
-                        <h3 className="font-medium text-black dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
-                          {video.title}
-                        </h3>
-                        <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                          <span className="flex items-center gap-1">
-                            <Eye size={14} />
-                            {video.views} vistas
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {video.createdAt}
-                          </span>
-                        </div>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-col">
+                      <h3 className="font-medium text-foreground dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                        {video.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <Eye size={14} />
+                          {video.views} vistas
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={14} />
+                          {video.createdAt}
+                        </span>
                       </div>
                     </div>
-                  </Link>
-
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        type="button"
-                        className="absolute top-2 right-2 p-2 bg-white/90 dark:bg-gray-800/90 hover:bg-white dark:hover:bg-gray-800 rounded-full shadow-sm hover:shadow-md transition-all z-10"
-                        title="Eliminar video"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 text-gray-600 hover:text-red-500 transition-colors" />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogTitle>
-                        ¿Estás seguro de eliminar este video?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. El video `
-                        {video.title}` será eliminado permanentemente de tu
-                        perfil.
-                      </AlertDialogDescription>
-                      <div className="flex justify-end gap-3 mt-6">
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(video.id)}
-                          disabled={deletingVideoId === video.id}
-                          className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
-                        >
-                          {deletingVideoId === video.id ? (
-                            <>
-                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              Eliminando...
-                            </>
-                          ) : (
-                            "Eliminar"
-                          )}
-                        </AlertDialogAction>
-                      </div>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  </div>
                 </div>
               ))}
             </div>
