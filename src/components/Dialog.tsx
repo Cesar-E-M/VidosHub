@@ -32,13 +32,16 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
+      // ✅ Usamos style inline para el fondo + clases Tailwind para el resto
+      style={{
+        backgroundColor: "var(--dialog-bg)",
+        borderColor: "var(--dialog-border)",
+      }}
       className={`
         fixed left-[50%] top-[50%] z-50
         w-full max-w-lg
         translate-x-[-50%] translate-y-[-50%]
-        rounded-xl p-6 shadow-2xl
-        bg-white dark:bg-gray-900
-        border border-gray-200 dark:border-gray-700
+        rounded-xl p-6 shadow-2xl border
         data-[state=open]:animate-in data-[state=closed]:animate-out
         data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0
         data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95
@@ -49,8 +52,11 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1 opacity-70 hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all focus:outline-none">
-        <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+      <DialogPrimitive.Close
+        className="absolute right-4 top-4 rounded-full p-1 opacity-70 hover:opacity-100 transition-all focus:outline-none"
+        style={{ color: "var(--dialog-text-muted)" }}
+      >
+        <X className="h-4 w-4" />
         <span className="sr-only">Cerrar</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -67,7 +73,6 @@ const DialogHeader = ({
     {...props}
   />
 );
-DialogHeader.displayName = "DialogHeader";
 
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
@@ -75,7 +80,8 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={`text-lg font-semibold text-gray-900 dark:text-gray-100 ${className}`}
+    style={{ color: "var(--dialog-text)" }}
+    className={`text-lg font-semibold ${className}`}
     {...props}
   />
 ));
@@ -87,7 +93,8 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={`text-sm text-gray-600 dark:text-gray-400 ${className}`}
+    style={{ color: "var(--dialog-text-muted)" }}
+    className={`text-sm ${className}`}
     {...props}
   />
 ));

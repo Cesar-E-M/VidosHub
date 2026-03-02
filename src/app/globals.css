@@ -13,6 +13,10 @@
   --input: #f3f4f6;
   --accent: #fef2f2;
   --accent-foreground: #171717;
+  --dialog-bg: #ffffff;
+  --dialog-border: #e5e7eb;
+  --dialog-text: #111827;
+  --dialog-text-muted: #6b7280;
 }
 
 .dark {
@@ -28,6 +32,10 @@
   --input: #18181b;
   --accent: #27272a;
   --accent-foreground: #ededed;
+  --dialog-bg: #111827;
+  --dialog-border: #374151;
+  --dialog-text: #f9fafb;
+  --dialog-text-muted: #9ca3af;
 }
 
 @theme inline {

@@ -276,7 +276,7 @@ const ProfilePage = () => {
             )}
           </div>
           <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground dark:text-gray-100 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground dark:text-foreground/80 mb-2">
               {perfile.displayName}
             </h1>
             <div className="space-y-2">
@@ -298,7 +298,7 @@ const ProfilePage = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-foreground/80 mb-6">
             Historial de Videos ({videos.length})
           </h2>
 
@@ -396,7 +396,7 @@ const ProfilePage = () => {
                     </Link>
                   </div>
 
-                  <div className="p-4">
+                  <div className="p-4 bg-background dark:bg-card">
                     <h3 className="font-medium text-foreground dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
                       {video.title}
                     </h3>
