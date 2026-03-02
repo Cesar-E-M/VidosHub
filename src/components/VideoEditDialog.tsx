@@ -143,7 +143,12 @@ export function VideoEditDialog({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Título del video"
               maxLength={100}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100"
+              style={{
+                backgroundColor: "var(--input-bg)",
+                borderColor: "var(--input-border)",
+                color: "var(--dialog-text)",
+              }}
+              className="w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -175,12 +180,20 @@ export function VideoEditDialog({
           <div className="space-y-2">
             <label
               htmlFor="category"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              className="text-sm font-medium"
+              style={{ color: "var(--dialog-text)" }}
             >
               Categoría
             </label>
             <Select.Root value={category} onValueChange={setCategory}>
-              <Select.Trigger className="inline-flex items-center justify-between w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary text-gray-900 dark:text-gray-100">
+              <Select.Trigger
+                style={{
+                  backgroundColor: "var(--input-bg)",
+                  borderColor: "var(--input-border)",
+                  color: "var(--dialog-text)",
+                }}
+                className="inline-flex items-center justify-between w-full px-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-primary"
+              >
                 <Select.Value placeholder="Selecciona una categoría" />
                 <Select.Icon>
                   <ChevronDownIcon className="w-4 h-4" />
@@ -188,9 +201,18 @@ export function VideoEditDialog({
               </Select.Trigger>
 
               <Select.Portal>
-                <Select.Content className="overflow-hidden bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                  <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-white dark:bg-gray-800 cursor-default">
-                    <ChevronUpIcon />
+                <Select.Content
+                  style={{
+                    backgroundColor: "var(--input-bg)",
+                    borderColor: "var(--input-border)",
+                  }}
+                  className="overflow-hidden rounded-md shadow-lg border z-[9999]"
+                >
+                  <Select.ScrollUpButton
+                    style={{ backgroundColor: "var(--input-bg)" }}
+                    className="flex items-center justify-center h-6 cursor-default"
+                  >
+                    <ChevronUpIcon style={{ color: "var(--dialog-text)" }} />
                   </Select.ScrollUpButton>
 
                   <Select.Viewport className="p-1">
@@ -198,18 +220,22 @@ export function VideoEditDialog({
                       <Select.Item
                         key={cat.value}
                         value={cat.value}
-                        className="relative flex items-center px-8 py-2 rounded-md text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer outline-none select-none data-[highlighted]:bg-gray-100 data-[highlighted]:dark:bg-gray-700"
+                        style={{ color: "var(--dialog-text)" }}
+                        className="relative flex items-center px-8 py-2 rounded-md text-sm cursor-pointer outline-none select-none data-[highlighted]:bg-black/10"
                       >
                         <Select.ItemIndicator className="absolute left-2 inline-flex items-center">
-                          <CheckIcon className="w-4 h-4" />
+                          <CheckIcon style={{ color: "var(--dialog-text)" }} />
                         </Select.ItemIndicator>
                         <Select.ItemText>{cat.label}</Select.ItemText>
                       </Select.Item>
                     ))}
                   </Select.Viewport>
 
-                  <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-white dark:bg-gray-800 cursor-default">
-                    <ChevronDownIcon />
+                  <Select.ScrollDownButton
+                    style={{ backgroundColor: "var(--input-bg)" }}
+                    className="flex items-center justify-center h-6 cursor-default"
+                  >
+                    <ChevronDownIcon style={{ color: "var(--dialog-text)" }} />
                   </Select.ScrollDownButton>
                 </Select.Content>
               </Select.Portal>

@@ -17,6 +17,8 @@
   --dialog-border: #e5e7eb;
   --dialog-text: #111827;
   --dialog-text-muted: #6b7280;
+  --input-bg: #f9fafb;
+  --input-border: #d1d5db;
 }
 
 .dark {
@@ -36,6 +38,8 @@
   --dialog-border: #374151;
   --dialog-text: #f9fafb;
   --dialog-text-muted: #9ca3af;
+  --input-bg: #1f2937;
+  --input-border: #4b5563;
 }
 
 @theme inline {

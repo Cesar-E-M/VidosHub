@@ -397,7 +397,7 @@ const ProfilePage = () => {
                   </div>
 
                   <div className="p-4 bg-background dark:bg-card">
-                    <h3 className="font-medium text-foreground dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
+                    <h3 className="font-medium text-black dark:text-gray-100 line-clamp-2 group-hover:text-primary transition-colors mb-2">
                       {video.title}
                     </h3>
                     <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
