@@ -208,30 +208,45 @@ export const Header = () => {
                   </button>
 
                   {isAbierto && (
-                    <div className="absolute right-0 top-full mt-3 w-48 bg-white dark:bg-card rounded-md shadow-lg py-1 z-10 border border-gray-100 dark:border-gray-700">
+                    <div
+                      style={{
+                        backgroundColor: "var(--dialog-bg)",
+                        borderColor: "var(--dialog-border)",
+                      }}
+                      className="absolute right-0 top-full mt-3 w-48 rounded-md shadow-lg py-1 z-10 border"
+                    >
                       <Link
                         href="/profile/me"
-                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+                        style={{ color: "var(--dialog-text)" }}
+                        className="flex items-center px-4 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                         onClick={() => setIsAbierto(false)}
                       >
                         <User className="inline-block mr-2 h-4 w-4" />
                         Mi Perfil
                       </Link>
 
-                      <hr className="my-1 border-gray-100 dark:border-gray-700" />
+                      <hr
+                        style={{ borderColor: "var(--dialog-border)" }}
+                        className="my-1"
+                      />
+
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer sm:hidden"
+                        style={{ color: "var(--dialog-text)" }}
+                        className="flex w-full items-center text-left px-4 py-2 text-sm hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer sm:hidden"
                         onClick={onOpen}
                       >
                         <Upload className="inline-block mr-2 h-4 w-4" />
                         Subir Video
                       </button>
 
-                      <hr className="my-1 border-gray-100 dark:border-gray-700 sm:hidden" />
+                      <hr
+                        style={{ borderColor: "var(--dialog-border)" }}
+                        className="my-1 sm:hidden"
+                      />
 
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                        className="flex w-full items-center text-left px-4 py-2 text-sm text-red-500 hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
                       >
                         <LogOut className="inline-block mr-2 h-4 w-4" />
                         Cerrar Sesión
