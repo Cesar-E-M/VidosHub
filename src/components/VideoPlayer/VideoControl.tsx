@@ -81,7 +81,7 @@ export const VideoControls = ({
           <span className="text-white mr-2 text-sm">
             {formatTime(progress)}
           </span>
-          <div className="relative flex-1 max-w-md h-1.5 bg-gray-600 rounded-full mr-2">
+          <div className="relative flex-1 h-1.5 bg-gray-600 rounded-full mr-2">
             <input
               type="range"
               className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"

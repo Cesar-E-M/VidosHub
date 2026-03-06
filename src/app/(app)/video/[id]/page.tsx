@@ -513,7 +513,7 @@ export default function VideoPage() {
                   {video.category}
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h1 className="text-2xl font-bold text-foreground dark:text-gray-100 mb-2">
                 {video.title}
               </h1>
             </div>
@@ -525,7 +525,7 @@ export default function VideoPage() {
                     {video.profiles?.full_name?.charAt(0) || "U"}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    <p className="font-semibold text-foreground dark:text-gray-100">
                       {video.profiles.full_name || "Usuario"}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -565,14 +565,14 @@ export default function VideoPage() {
                     {formatDate(video.created_at)}
                   </div>
                 </div>
-                <p className="text-gray-800 dark:text-gray-300 whitespace-pre-wrap">
+                <p className="text-foreground dark:text-gray-300 whitespace-pre-wrap">
                   {video.description || "Sin descripción"}
                 </p>
               </div>
             </div>
 
             <div className="bg-white dark:bg-card rounded-lg p-4 border border-gray-300 dark:border-gray-700">
-              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+              <h2 className="text-xl font-bold mb-4 text-foreground dark:text-gray-100">
                 Comentarios ({comments.length})
               </h2>
 
@@ -589,7 +589,7 @@ export default function VideoPage() {
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Añade un comentario..."
-                        className="w-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-input text-gray-900 dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
+                        className="w-full border border-gray-300 dark:border-gray-600 bg-background dark:bg-input text-foreground dark:text-foreground rounded-lg p-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-500"
                         rows={3}
                         disabled={
                           isSubmittingComment ||
