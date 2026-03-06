@@ -1,10 +1,10 @@
 import "./globals.css";
 import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
-import { Toaster } from "sonner";
 import { UploadModal } from "@/components/UploadModal";
 import { AuthProvider } from "@/hooks/context/useAuth";
 import { ThemeProvider } from "@/hooks/context/useTheme";
+import { ToasterWrapper } from "@/components/ToasterWrapper";
 
 export default function RootLayout({
   children,
@@ -35,23 +35,7 @@ export default function RootLayout({
           <Theme>
             <AuthProvider>
               {children}
-              <Toaster
-                position="top-right"
-                richColors
-                theme="dark" // o "dark"
-                toastOptions={{
-                  style: {
-                    background: "white",
-                    color: "#1f2937",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "0.75rem",
-                    fontSize: "14px",
-                    padding: "16px",
-                  },
-                  className: "custom-toast",
-                  duration: 4000,
-                }}
-              />
+              <ToasterWrapper />
               <UploadModal />
             </AuthProvider>
           </Theme>
